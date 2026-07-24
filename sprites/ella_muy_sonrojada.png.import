@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djy1n0fprcelx"
-path="res://.godot/imported/ella_neutral.png-51b503b2b0466a9921ab8035fce41834.ctex"
+uid="uid://cwv26lf25v8tq"
+path="res://.godot/imported/ella_muy_sonrojada.png-63df2f67f3478687ab8a417be43f827c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ella_neutral.png"
-dest_files=["res://.godot/imported/ella_neutral.png-51b503b2b0466a9921ab8035fce41834.ctex"]
+source_file="res://sprites/ella_muy_sonrojada.png"
+dest_files=["res://.godot/imported/ella_muy_sonrojada.png-63df2f67f3478687ab8a417be43f827c.ctex"]
 
 [params]
 

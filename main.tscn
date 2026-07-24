@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dhrd0yhf4uve1" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://beydb1s66dbyc" path="res://Fondo/Fondo.png" id="2_h2yge"]
-[ext_resource type="Texture2D" uid="uid://bk8sdnl4d1xsu" path="res://sprites/ella_neutral.png" id="3_h2yge"]
+[ext_resource type="Texture2D" uid="uid://bk8sdnl4d1xsu" path="res://sprites/ella_ojos_cerrados2.png" id="3_h2yge"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h2yge"]
 bg_color = Color(0, 0, 0, 0.74509805)
@@ -83,10 +83,12 @@ text = "Hola"
 
 [node name="Reloj" type="Label" parent="." unique_id=1864550439]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 60.0
-offset_bottom = 43.0
+offset_left = 880.0
+offset_top = 96.0
+offset_right = 990.0
+offset_bottom = 228.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 96
 text = "10"
 
 [node name="Timer" type="Timer" parent="." unique_id=1238000626]

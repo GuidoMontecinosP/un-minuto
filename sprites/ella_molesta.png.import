@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djy1n0fprcelx"
-path="res://.godot/imported/ella_neutral.png-51b503b2b0466a9921ab8035fce41834.ctex"
+uid="uid://nnua84ar3ddx"
+path="res://.godot/imported/ella_molesta.png-beb646265e8f9ffcbffb513c539f34c7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ella_neutral.png"
-dest_files=["res://.godot/imported/ella_neutral.png-51b503b2b0466a9921ab8035fce41834.ctex"]
+source_file="res://sprites/ella_molesta.png"
+dest_files=["res://.godot/imported/ella_molesta.png-beb646265e8f9ffcbffb513c539f34c7.ctex"]
 
 [params]
 
