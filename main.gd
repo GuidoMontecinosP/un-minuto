@@ -12,6 +12,7 @@ extends Control
 @onready var timer_texto = $TimerTexto
 @onready var timer_auto_avance = $TimerAutoAvance
 @onready var chica = $Chica
+@onready var contador_clicks = $ContadorClicks
 
 
 # =========================================================
@@ -216,6 +217,8 @@ func _ready() -> void:
 	timer_texto.wait_time = velocidad_texto
 
 	reloj.visible = false
+	contador_clicks.visible = false
+	contador_clicks.text = "Clics: 0"
 
 	dialogos_actuales = dialogos_introduccion
 	indice = 0
@@ -322,6 +325,8 @@ func iniciar_minuto() -> void:
 	tiempo_restante = TIEMPO_TOTAL
 
 	cantidad_clicks = 0
+	contador_clicks.text = "Clics: 0"
+	
 	clicks_bloque = 0
 
 	bloque_actual_numero = 1
@@ -352,6 +357,9 @@ func registrar_click() -> void:
 	cantidad_clicks += 1
 	clicks_bloque += 1
 
+	if contador_clicks.visible:
+		contador_clicks.text = "Clics: " + str(cantidad_clicks)
+
 	var momento_actual := Time.get_ticks_msec() / 1000.0
 	var diferencia := momento_actual - tiempo_ultimo_click
 
@@ -368,7 +376,6 @@ func registrar_click() -> void:
 			and not rabia_mostrada
 		):
 			congelar_por_rabia()
-
 	else:
 		clicks_rapidos = 0
 
@@ -539,6 +546,8 @@ func insertar_despues(reacciones: Array) -> void:
 func resolver_tutorial(respondio: bool) -> void:
 	if respondio:
 		respondio_tutorial = true
+		contador_clicks.visible = true
+		contador_clicks.text = "Clics: " + str(cantidad_clicks)
 
 		insertar_despues([
 			{

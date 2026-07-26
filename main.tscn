@@ -83,10 +83,10 @@ text = "Hola"
 
 [node name="Reloj" type="Label" parent="." unique_id=1864550439]
 layout_mode = 0
-offset_left = 880.0
-offset_top = 96.0
-offset_right = 990.0
-offset_bottom = 228.0
+offset_left = 952.0
+offset_top = 280.0
+offset_right = 1062.0
+offset_bottom = 412.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 96
 text = "10"
@@ -107,6 +107,15 @@ wait_time = 0.03
 
 [node name="TimerAutoAvance" type="Timer" parent="." unique_id=800930821]
 one_shot = true
+
+[node name="ContadorClicks" type="Label" parent="." unique_id=874194725]
+visible = false
+layout_mode = 0
+offset_left = 960.0
+offset_top = 416.0
+offset_right = 1153.0
+offset_bottom = 485.0
+theme_override_font_sizes/font_size = 50
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="Avanzar" to="." method="_on_avanzar_pressed"]
