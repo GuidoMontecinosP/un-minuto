@@ -25,14 +25,15 @@ const SPRITE_DEFAULT := "ella_neutral.png"
 const TIEMPO_TOTAL := 60
 const SAVE_PATH := "user://progreso_1minuto.save"
 
-const VENTANA_RESPUESTA := 3.5
+const VENTANA_RESPUESTA := 5.0
 
 const OBJETIVO_INICIAL := 10
 const UMBRAL_RABIA := 250
 
 # Deben coincidir con los números que tienen easter egg en
-# obtener_final_numero_especial().
-const NUMEROS_ESPECIALES := [67, 69, 100, 404, 420]
+# obtener_final_numero_especial(). Techo realista: alguien
+# clickeando fuerte llega a ~137, así que ninguno se pasa de ahí.
+const NUMEROS_ESPECIALES := [42, 67, 69, 77, 100, 111, 130]
 
 
 # =========================================================
@@ -94,6 +95,12 @@ var respondio_tutorial := false
 
 var ruta_reto_activa := false
 var reto_completado := false
+var ruta_perdedor := false
+
+# Cuántos clics tenías cuando se anunció el objetivo actual.
+# Sirve para distinguir "nunca lo intentó" de "lo intentó y
+# no le alcanzó".
+var clicks_al_anunciar_reto := 0
 
 var confirmo_que_escucha := false
 
@@ -123,7 +130,7 @@ var progreso := {
 	"vio_romantica": false,
 	"vio_rabia": false,
 	"vio_reto_completado": false,
-	"vio_reto_incompleto": false,
+	"vio_perdedor": false,
 	"partidas_jugadas": 0
 }
 
@@ -226,7 +233,7 @@ func construir_intro_replay() -> Array:
 	elif num == 3:
 		return intro_replay_3()
 	elif num <= 9:
-		return intro_replay_generica(num)
+		return intro_replay_generica(num + 1)
 	else:
 		return intro_replay_corta()
 
@@ -462,10 +469,12 @@ func mostrar_dialogo() -> void:
 	# no cuando arrancó el bloque.
 	match tipo_especial:
 		"anuncio_objetivo_inicial":
+			clicks_al_anunciar_reto = cantidad_clicks
 			objetivo_actual = cantidad_clicks + 10
 			texto_linea = "Quiero ver si llegas a " + str(objetivo_actual) + " clics."
 
 		"anuncio_objetivo_siguiente":
+			clicks_al_anunciar_reto = cantidad_clicks
 			objetivo_actual = calcular_siguiente_objetivo(cantidad_clicks)
 			texto_linea = "Esta vez quiero llegar a " + str(objetivo_actual) + "."
 
@@ -579,6 +588,8 @@ func iniciar_minuto() -> void:
 	respondio_tutorial = false
 	ruta_reto_activa = false
 	reto_completado = false
+	ruta_perdedor = false
+	clicks_al_anunciar_reto = 0
 	confirmo_que_escucha = false
 	ruta_romantica = false
 	ruta_cobarde = false
@@ -599,7 +610,8 @@ func iniciar_minuto() -> void:
 
 
 func actualizar_reloj() -> void:
-	var minutos := int(tiempo_restante / 60)
+	@warning_ignore("integer_division")
+	var minutos := tiempo_restante / 60
 	var segundos := tiempo_restante % 60
 
 	reloj.text = "%02d:%02d" % [minutos, segundos]
@@ -609,6 +621,13 @@ func actualizar_reloj() -> void:
 # CLICS
 # El diálogo avanza solo (con los timers). El clic SOLO
 # cuenta y SOLO responde preguntas activas.
+#
+# IMPORTANTE: conteo_clicks_habilitado ahora funciona como
+# una "ventana" real. Solo está en true mientras hay un reto
+# de verdad en curso (ver decidir_siguiente_bloque). Apenas
+# se cumple la meta o se acaba el tiempo del reto, se apaga.
+# Así los clics fuera de esas ventanas no cuentan para nada
+# ni ensucian el siguiente objetivo.
 # =========================================================
 
 func registrar_click() -> void:
@@ -633,13 +652,16 @@ func registrar_click() -> void:
 		return
 
 	# Si ya cumpliste el objetivo del reto, no hace falta
-	# esperar el resto de la ventana de tiempo.
+	# esperar el resto de la ventana de tiempo. Se bloquean
+	# los clics de inmediato para que no sigan sumando de
+	# más ni afecten el siguiente tramo.
 	if (
 		reto_anunciado
 		and reto_deadline >= 0.0
 		and cantidad_clicks >= objetivo_actual
 	):
 		reto_anunciado = false
+		conteo_clicks_habilitado = false
 		esperando_siguiente_tramo = false
 		cerrar_bloque(bloque_actual_numero)
 
@@ -712,8 +734,9 @@ func iniciar_pregunta(tipo: String, duracion: float) -> void:
 	pregunta_activa = tipo
 	pregunta_token += 1
 
-	# Los clics recién empiezan a contar cuando arranca
-	# la pregunta del tutorial.
+	# El primer clic del tutorial ("haz clic si me estás
+	# escuchando") sigue siendo especial: es tanto la
+	# respuesta a la pregunta como el primer clic contado.
 	if tipo == "tutorial":
 		conteo_clicks_habilitado = true
 
@@ -791,9 +814,12 @@ func resolver_tutorial(respondio: bool) -> void:
 		# El número exacto se calcula justo antes de mostrarlo
 		# (ver mostrar_dialogo / "anuncio_objetivo_inicial"),
 		# así el jugador no puede cumplirlo antes de que Ella
-		# termine de pedirlo.
+		# termine de pedirlo. La ventana real de clickeo recién
+		# se abre en decidir_siguiente_bloque(), que es donde
+		# se vuelve a encender conteo_clicks_habilitado.
 		reto_anunciado = true
 		reto_deadline = -1.0
+		conteo_clicks_habilitado = false
 
 		insertar_despues([
 			{
@@ -848,6 +874,7 @@ func resolver_tutorial(respondio: bool) -> void:
 
 	else:
 		respondio_tutorial = false
+		conteo_clicks_habilitado = false
 
 		insertar_despues([
 			{
@@ -1060,6 +1087,7 @@ func _on_timer_timeout() -> void:
 
 		if ahora >= reto_deadline:
 			reto_anunciado = false
+			conteo_clicks_habilitado = false
 			esperando_siguiente_tramo = false
 			cerrar_bloque(bloque_actual_numero)
 
@@ -1104,10 +1132,22 @@ func decidir_siguiente_bloque() -> void:
 		return
 
 	if reto_anunciado:
+		# Si ya cumpliste el objetivo mientras Ella todavía
+		# hablaba, no hace falta esperar toda la ventana.
+		if cantidad_clicks >= objetivo_actual:
+			reto_anunciado = false
+			reto_deadline = -1.0
+			conteo_clicks_habilitado = false
+			cerrar_bloque(bloque_actual_numero)
+			return
+
 		# La ventana de clickeo arranca recién cuando termina
-		# de mostrarse el diálogo del reto, no antes.
+		# de mostrarse el diálogo del reto, no antes. Es acá
+		# donde se vuelve a habilitar el conteo de clics: es
+		# el único momento en que clickear cuenta de verdad.
 		if reto_deadline < 0.0:
 			reto_deadline = Time.get_ticks_msec() / 1000.0 + VENTANA_RETO
+			conteo_clicks_habilitado = true
 
 		esperar_siguiente_tramo()
 		return
@@ -1133,6 +1173,7 @@ func decidir_siguiente_bloque() -> void:
 
 func cerrar_bloque(numero: int) -> void:
 	esperando_siguiente_tramo = false
+	conteo_clicks_habilitado = false
 
 	if numero == 1:
 		if cantidad_clicks >= objetivo_actual and not romance_bloqueado:
@@ -1142,7 +1183,8 @@ func cerrar_bloque(numero: int) -> void:
 
 			# El número del segundo objetivo se calcula al
 			# mostrar la línea "anuncio_objetivo_siguiente"
-			# dentro de bloque_2_reto(), no acá.
+			# dentro de bloque_2_reto(), no acá. La ventana de
+			# clickeo se vuelve a abrir en decidir_siguiente_bloque().
 			reto_anunciado = true
 			reto_deadline = -1.0
 
@@ -1164,20 +1206,40 @@ func cerrar_bloque(numero: int) -> void:
 				# su propia ruta zen, sin más preguntas.
 				ruta_zen = true
 				cargar_bloque(bloque_2_zen())
+			elif cantidad_clicks > clicks_al_anunciar_reto:
+				# Sí aceptó el reto (siguió clickeando después de
+				# que se lo pidieron), pero no le alcanzó. Esto es
+				# perder el reto, no una ruta secreta.
+				ruta_perdedor = true
+				romance_bloqueado = true
+				cargar_bloque(bloque_2_perdedor())
 			else:
-				# Sí respondió, pero no llegó al objetivo: todavía
-				# puede desviarse a la ruta romántica o caer en zen.
+				# Respondió el tutorial pero no volvió a clickear
+				# ni una vez: nunca aceptó el reto en la práctica,
+				# así que todavía puede desviarse a la ruta
+				# romántica o caer en zen.
 				cargar_bloque(bloque_2_intento_fallido())
 
 	elif numero == 2:
 		if ruta_reto_activa:
 			reto_completado = cantidad_clicks >= objetivo_actual
 
+			if not reto_completado:
+				ruta_perdedor = true
+
 		reto_anunciado = false
 		reto_deadline = -1.0
 
 		clicks_bloque = 0
 		bloque_actual_numero = 3
+
+		# Si cumplió el reto final, se le suelta la mano: puede
+		# seguir clickeando libremente el resto del tiempo, sin
+		# meta ni ventana (solo por diversión / easter eggs). Si
+		# perdió, queda bloqueado — ver ruta_perdedor en
+		# bloque_3_final().
+		if ruta_reto_activa and reto_completado:
+			conteo_clicks_habilitado = true
 
 		cargar_bloque(bloque_3_final())
 
@@ -1225,7 +1287,7 @@ func bloque_1() -> Array:
 			"texto": "Haz clic si me estás escuchando.",
 			"expresion": "coqueta",
 			"pregunta": "tutorial",
-			"ventana": 3.5
+			"ventana": 5.0
 		}
 	]
 
@@ -1262,9 +1324,9 @@ func bloque_2_reto() -> Array:
 		},
 		{
 			"nombre": "Ella",
-			"texto": "Sin trampas.",
+			"texto": "Y esta vez no te me relajes.",
 			"expresion": "molesta",
-			"espera": 1.0
+			"espera": 1.1
 		}
 	]
 
@@ -1322,8 +1384,8 @@ func bloque_2_zen() -> Array:
 
 
 # =========================================================
-# BLOQUE 2 — INTENTO FALLIDO (respondió el tutorial pero no
-# llegó al objetivo del reto)
+# BLOQUE 2 — INTENTO FALLIDO (respondió el tutorial pero
+# nunca volvió a clickear: no llegó a aceptar el reto)
 # =========================================================
 
 func bloque_2_intento_fallido() -> Array:
@@ -1336,7 +1398,7 @@ func bloque_2_intento_fallido() -> Array:
 		},
 		{
 			"nombre": "Ella",
-			"texto": "No cumpliste el reto.",
+			"texto": "Ni lo intentaste.",
 			"expresion": "confundida",
 			"espera": 1.2
 		},
@@ -1357,7 +1419,41 @@ func bloque_2_intento_fallido() -> Array:
 			"texto": "Haz clic si sigues ahí.",
 			"expresion": "coqueta",
 			"pregunta": "sigues_ahi",
-			"ventana": 3.5
+			"ventana": 5.0
+		}
+	]
+
+
+# =========================================================
+# BLOQUE 2 — PERDEDOR (aceptó el reto, siguió clickeando,
+# pero no le alcanzó para llegar al objetivo)
+# =========================================================
+
+func bloque_2_perdedor() -> Array:
+	return [
+		{
+			"nombre": "Ella",
+			"texto": "Vaya.",
+			"expresion": "sorprendida",
+			"espera": 0.9
+		},
+		{
+			"nombre": "Ella",
+			"texto": "Sí que lo intentaste.",
+			"expresion": "confundida",
+			"espera": 1.1
+		},
+		{
+			"nombre": "Ella",
+			"texto": "Pero no te alcanzó.",
+			"expresion": "molesta",
+			"espera": 1.1
+		},
+		{
+			"nombre": "Ella",
+			"texto": "Qué vergüenza, la verdad.",
+			"expresion": "coqueta",
+			"espera": 1.2
 		}
 	]
 
@@ -1427,7 +1523,13 @@ func bloque_3_final() -> Array:
 			}
 		]
 
-	if ruta_reto_activa:
+	# CORREGIDO: antes esto se activaba con solo "ruta_reto_activa",
+	# lo que hacía que el jugador recibiera "métele caña" incluso
+	# cuando ya había perdido el segundo reto (ruta_reto_activa y
+	# ruta_perdedor pueden ser true al mismo tiempo). Ahora depende
+	# también de reto_completado, y el caso de haber perdido se
+	# maneja aparte, sin dar señales de que todavía hay esperanza.
+	if ruta_reto_activa and reto_completado:
 		return [
 			{
 				"nombre": "Ella",
@@ -1437,15 +1539,37 @@ func bloque_3_final() -> Array:
 			},
 			{
 				"nombre": "Ella",
-				"texto": "Métele caña.",
-				"expresion": "molesta",
-				"espera": 0.9
+				"texto": "Cumpliste el reto.",
+				"expresion": "coqueta",
+				"espera": 1.0
 			},
 			{
 				"nombre": "Ella",
-				"texto": "Quiero ver más clics antes de que se acabe.",
-				"expresion": "coqueta",
-				"espera": 1.4
+				"texto": "Métele caña. Quiero ver cuántos clics más haces antes de que se acabe.",
+				"expresion": "molesta",
+				"espera": 1.6
+			}
+		]
+
+	if ruta_perdedor:
+		return [
+			{
+				"nombre": "Ella",
+				"texto": str(cantidad_clicks) + " clics.",
+				"expresion": "neutral",
+				"espera": 1.1
+			},
+			{
+				"nombre": "Ella",
+				"texto": "No llegaste.",
+				"expresion": "molesta",
+				"espera": 1.0
+			},
+			{
+				"nombre": "Ella",
+				"texto": "Ya no hay mucho más que hacer al respecto.",
+				"expresion": "confundida",
+				"espera": 1.3
 			}
 		]
 
@@ -1574,13 +1698,13 @@ func construir_bloque_final() -> Array:
 	return bloque
 
 
-# Prioridad de finales: número especial > romántica > cobarde
-# > zen > rabia > reto completado > reto incompleto > normal.
+# Prioridad de finales: romántica > cobarde > zen > indecisa
+# > número especial > rabia > reto completado > reto
+# incompleto > normal. Los números especiales van después de
+# las rutas narrativas para no pisarlas (ej: romántica con
+# 69 clics debe seguir siendo el final romántico).
 func construir_cuerpo_final() -> Array:
 	var final_especial := obtener_final_numero_especial()
-
-	if not final_especial.is_empty():
-		return final_especial
 
 	if ruta_romantica:
 		return [
@@ -1663,6 +1787,18 @@ func construir_cuerpo_final() -> Array:
 				"texto": "O aterrador.",
 				"expresion": "coqueta",
 				"espera": 1.2
+			},
+			{
+				"nombre": "Ella",
+				"texto": "A veces no intentar también es una decisión.",
+				"expresion": "confundida",
+				"espera": 1.6
+			},
+			{
+				"nombre": "Ella",
+				"texto": "Filosóficamente hablando, claro.",
+				"expresion": "coqueta",
+				"espera": 1.3
 			}
 		]
 
@@ -1722,6 +1858,9 @@ func construir_cuerpo_final() -> Array:
 			}
 		]
 
+	elif not final_especial.is_empty():
+		return final_especial
+
 	elif modo_rabia:
 		return [
 			{
@@ -1766,27 +1905,58 @@ func construir_cuerpo_final() -> Array:
 			}
 		]
 
-	elif ruta_reto_activa and not reto_completado:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": str(cantidad_clicks) + " clics.",
-				"expresion": "neutral",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "No llegaste al objetivo.",
-				"expresion": "confundida",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Casi.",
-				"expresion": "coqueta",
-				"espera": 0.9
-			}
-		]
+	elif ruta_perdedor:
+		if ruta_reto_activa:
+			# Perdió en el segundo tramo, después de haber
+			# pasado el primero.
+			return [
+				{
+					"nombre": "Ella",
+					"texto": str(cantidad_clicks) + " clics.",
+					"expresion": "neutral",
+					"espera": 1.1
+				},
+				{
+					"nombre": "Ella",
+					"texto": "Tan cerca.",
+					"expresion": "confundida",
+					"espera": 1.0
+				},
+				{
+					"nombre": "Ella",
+					"texto": "Y aun así, no llegaste.",
+					"expresion": "molesta",
+					"espera": 1.3
+				}
+			]
+		else:
+			# Perdió directamente en el primer tramo.
+			return [
+				{
+					"nombre": "Ella",
+					"texto": str(cantidad_clicks) + " clics.",
+					"expresion": "neutral",
+					"espera": 1.1
+				},
+				{
+					"nombre": "Ella",
+					"texto": "Aceptaste el reto...",
+					"expresion": "confundida",
+					"espera": 1.1
+				},
+				{
+					"nombre": "Ella",
+					"texto": "y lo perdiste.",
+					"expresion": "molesta",
+					"espera": 1.0
+				},
+				{
+					"nombre": "Ella",
+					"texto": "Ni siquiera te pedí tanto.",
+					"expresion": "coqueta",
+					"espera": 1.3
+				}
+			]
 
 	else:
 		return [
@@ -1823,6 +1993,28 @@ func construir_cuerpo_final() -> Array:
 
 func obtener_final_numero_especial() -> Array:
 	match cantidad_clicks:
+		42:
+			return [
+				{
+					"nombre": "Ella",
+					"texto": "42 clics.",
+					"expresion": "confundida",
+					"espera": 1.0
+				},
+				{
+					"nombre": "Ella",
+					"texto": "La respuesta a la vida, el universo y todo lo demás.",
+					"expresion": "coqueta",
+					"espera": 1.7
+				},
+				{
+					"nombre": "Ella",
+					"texto": "Qué nerd.",
+					"expresion": "molesta",
+					"espera": 1.0
+				}
+			]
+
 		67:
 			return [
 				{
@@ -1885,25 +2077,19 @@ func obtener_final_numero_especial() -> Array:
 				}
 			]
 
-		420:
+		77:
 			return [
 				{
 					"nombre": "Ella",
-					"texto": "420 clics.",
+					"texto": "77 clics.",
 					"expresion": "confundida",
 					"espera": 1.0
 				},
 				{
 					"nombre": "Ella",
-					"texto": "Muy sutil.",
+					"texto": "Número random elegido con mucho compromiso.",
 					"expresion": "coqueta",
-					"espera": 1.1
-				},
-				{
-					"nombre": "Ella",
-					"texto": "¿Debería fingir que no lo noté?",
-					"expresion": "neutral",
-					"espera": 1.3
+					"espera": 1.4
 				}
 			]
 
@@ -1929,19 +2115,41 @@ func obtener_final_numero_especial() -> Array:
 				}
 			]
 
-		404:
+		111:
 			return [
 				{
 					"nombre": "Ella",
-					"texto": "404 clics.",
+					"texto": "111 clics.",
 					"expresion": "confundida",
 					"espera": 1.0
 				},
 				{
 					"nombre": "Ella",
-					"texto": "Cita no encontrada.",
+					"texto": "Triple uno.",
+					"expresion": "sorprendida",
+					"espera": 0.9
+				},
+				{
+					"nombre": "Ella",
+					"texto": "¿Estás bien?",
 					"expresion": "coqueta",
-					"espera": 1.2
+					"espera": 1.1
+				}
+			]
+
+		130:
+			return [
+				{
+					"nombre": "Ella",
+					"texto": "130 clics.",
+					"expresion": "sorprendida",
+					"espera": 1.0
+				},
+				{
+					"nombre": "Ella",
+					"texto": "Ya casi ni sé si esto sigue siendo un juego.",
+					"expresion": "coqueta",
+					"espera": 1.4
 				}
 			]
 
@@ -2003,6 +2211,17 @@ func bloque_despedida() -> Array:
 # =========================================================
 
 func obtener_linea_pista() -> Dictionary:
+	# Si esta partida terminó en zen y todavía no completaste
+	# el reto, esa es la sugerencia más útil posible: son casi
+	# opuestos, así que tiene sentido nudgear justo hacia allá.
+	if ruta_zen and not progreso["vio_reto_completado"]:
+		return {
+			"nombre": "Ella",
+			"texto": "La próxima vez, prueba aceptar el reto en vez de ignorarme.",
+			"expresion": "coqueta",
+			"espera": 1.9
+		}
+
 	if not progreso["vio_zen"]:
 		return {
 			"nombre": "Ella",
@@ -2043,7 +2262,7 @@ func obtener_linea_pista() -> Dictionary:
 			"espera": 1.6
 		}
 
-	elif not progreso["vio_reto_incompleto"]:
+	elif not progreso["vio_perdedor"]:
 		return {
 			"nombre": "Ella",
 			"texto": "Acepta el reto, pero no te esfuerces tanto.",
@@ -2082,8 +2301,8 @@ func actualizar_progreso() -> void:
 	if ruta_reto_activa and reto_completado:
 		progreso["vio_reto_completado"] = true
 
-	if ruta_reto_activa and not reto_completado:
-		progreso["vio_reto_incompleto"] = true
+	if ruta_perdedor:
+		progreso["vio_perdedor"] = true
 
 
 func guardar_progreso() -> void:
@@ -2131,7 +2350,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			"vio_romantica": false,
 			"vio_rabia": false,
 			"vio_reto_completado": false,
-			"vio_reto_incompleto": false,
+			"vio_perdedor": false,
 			"partidas_jugadas": 0
 		}
 
