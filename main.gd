@@ -28,7 +28,10 @@ const SAVE_PATH := "user://progreso_1minuto.save"
 const VENTANA_RESPUESTA := 5.0
 
 const OBJETIVO_INICIAL := 10
-const UMBRAL_RABIA := 250
+
+# Clics durante la introducción (antes de que empiece el minuto)
+# que hacen que Ella pierda la paciencia y corte la conversación.
+const UMBRAL_IMPACIENCIA := 8
 
 # Deben coincidir con los números que tienen easter egg en
 # obtener_final_numero_especial(). Techo realista: alguien
@@ -65,11 +68,11 @@ var clicks_bloque := 0
 
 var conteo_clicks_habilitado := false
 
-var modo_rabia := false
-var rabia_mostrada := false
-var congelado := false
-
-var clicks_al_congelar := 0
+# Clics acumulados durante la introducción, antes de que
+# empiece el minuto. No se muestran ni cuentan para ningún
+# reto — solo sirven para detectar impaciencia.
+var clicks_antes_del_minuto := 0
+var ruta_impaciente := false
 
 
 # =========================================================
@@ -128,10 +131,11 @@ var progreso := {
 	"vio_zen": false,
 	"vio_indecisa": false,
 	"vio_romantica": false,
-	"vio_rabia": false,
+	"vio_impaciente": false,
 	"vio_reto_completado": false,
 	"vio_perdedor": false,
-	"partidas_jugadas": 0
+	"partidas_jugadas": 0,
+	"numeros_especiales_vistos": []
 }
 
 
@@ -596,10 +600,8 @@ func iniciar_minuto() -> void:
 	ruta_zen = false
 	ruta_indecisa = false
 	romance_bloqueado = false
-	modo_rabia = false
-	rabia_mostrada = false
-	congelado = false
-	clicks_al_congelar = 0
+	ruta_impaciente = false
+	clicks_antes_del_minuto = 0
 
 	reloj.visible = true
 	actualizar_reloj()
@@ -631,7 +633,11 @@ func actualizar_reloj() -> void:
 # =========================================================
 
 func registrar_click() -> void:
-	if not minuto_iniciado or juego_terminado:
+	if juego_terminado:
+		return
+
+	if not minuto_iniciado:
+		registrar_click_antes_del_minuto()
 		return
 
 	if not conteo_clicks_habilitado:
@@ -642,14 +648,6 @@ func registrar_click() -> void:
 
 	if contador_clicks.visible:
 		contador_clicks.text = "Clics: " + str(cantidad_clicks)
-
-	if (
-		cantidad_clicks >= UMBRAL_RABIA
-		and not congelado
-		and not rabia_mostrada
-	):
-		congelar_por_rabia()
-		return
 
 	# Si ya cumpliste el objetivo del reto, no hace falta
 	# esperar el resto de la ventana de tiempo. Se bloquean
@@ -664,6 +662,21 @@ func registrar_click() -> void:
 		conteo_clicks_habilitado = false
 		esperando_siguiente_tramo = false
 		cerrar_bloque(bloque_actual_numero)
+
+
+# Clics que pasan mientras Ella todavía está en la
+# introducción: no muestran contador ni cuentan para ningún
+# reto, solo se acumulan en silencio. Si el jugador insiste
+# demasiado antes de que empiece el minuto, Ella pierde la
+# paciencia y corta la conversación de una.
+func registrar_click_antes_del_minuto() -> void:
+	if fase_actual != "introduccion":
+		return
+
+	clicks_antes_del_minuto += 1
+
+	if clicks_antes_del_minuto >= UMBRAL_IMPACIENCIA:
+		activar_final_impaciente()
 
 
 func _on_avanzar_pressed() -> void:
@@ -704,9 +717,6 @@ func finalizar_linea() -> void:
 
 
 func iniciar_espera_autoavance() -> void:
-	if congelado:
-		return
-
 	if juego_terminado and fase_actual != "final":
 		return
 
@@ -944,6 +954,12 @@ func resolver_sigues_ahi(respondio: bool) -> void:
 		confirmo_que_escucha = false
 		ruta_indecisa = true
 
+		# A partir de acá los clics sí cuentan otra vez: si el
+		# jugador sigue clickeando sin que se le esté preguntando
+		# nada, eso es justo el gesto "maleducado" que describe
+		# el final de ruta_indecisa con más de un clic.
+		conteo_clicks_habilitado = true
+
 		insertar_despues([
 			{
 				"nombre": "Ella",
@@ -1128,7 +1144,7 @@ func esperar_siguiente_tramo() -> void:
 # =========================================================
 
 func decidir_siguiente_bloque() -> void:
-	if juego_terminado or congelado:
+	if juego_terminado:
 		return
 
 	if reto_anunciado:
@@ -1577,87 +1593,77 @@ func bloque_3_final() -> Array:
 
 
 # =========================================================
-# SPAM EXTREMO
+# RUTA IMPACIENTE (antes de que empiece el minuto)
 # =========================================================
 
-func congelar_por_rabia() -> void:
-	if congelado or rabia_mostrada:
+func activar_final_impaciente() -> void:
+	if juego_terminado:
 		return
 
-	congelado = true
-	modo_rabia = true
-	rabia_mostrada = true
+	ruta_impaciente = true
+	juego_terminado = true
+	minuto_iniciado = false
+	fase_actual = "final"
 
-	romance_bloqueado = true
-
-	pregunta_activa = ""
-	pregunta_token += 1
-
-	clicks_al_congelar = cantidad_clicks
-
+	timer.stop()
 	timer_texto.stop()
 	timer_auto_avance.stop()
 
 	escribiendo = false
-	texto.visible_characters = -1
+	pregunta_activa = ""
+	pregunta_token += 1
 
-	cambiar_expresion("molesta")
+	# Esta ruta nunca llega a terminar_minuto(), así que el
+	# progreso se actualiza y guarda acá mismo.
+	progreso["partidas_jugadas"] += 1
+	progreso["vio_impaciente"] = true
+	guardar_progreso()
 
-	nombre.text = "Ella"
-	texto.text = "..."
-
-	get_tree().create_timer(3.0).timeout.connect(
-		_on_fin_congelamiento
-	)
-
-
-func _on_fin_congelamiento() -> void:
-	if juego_terminado:
-		return
-
-	congelado = false
-
-	var clicks_durante := cantidad_clicks - clicks_al_congelar
-
-	cargar_bloque(
-		bloque_post_congelamiento(clicks_durante)
-	)
+	cargar_bloque(bloque_impaciente())
 
 
-func bloque_post_congelamiento(clicks_durante: int) -> Array:
+func bloque_impaciente() -> Array:
 	return [
 		{
 			"nombre": "Ella",
-			"texto": "¿Ya?",
+			"texto": "...",
+			"expresion": "molesta",
+			"espera": 0.8
+		},
+		{
+			"nombre": "Ella",
+			"texto": "¿En serio?",
 			"expresion": "molesta",
 			"espera": 1.0
 		},
 		{
 			"nombre": "Ella",
-			"texto": "¿Terminaste?",
-			"expresion": "molesta",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": (
-				"Seguiste clickeando "
-				+ str(clicks_durante)
-				+ " veces mientras estaba callada."
-			),
+			"texto": "Ni siquiera ha empezado el minuto.",
 			"expresion": "confundida",
-			"espera": 1.8
+			"espera": 1.3
 		},
 		{
 			"nombre": "Ella",
-			"texto": "Ni siquiera necesitabas que hablara.",
-			"expresion": "neutral",
-			"espera": 1.5
+			"texto": "Y ya estás desesperado por hacer clic.",
+			"expresion": "molesta",
+			"espera": 1.4
 		},
 		{
 			"nombre": "Ella",
-			"texto": "Eso explica muchas cosas.",
-			"expresion": "coqueta",
+			"texto": "No, gracias.",
+			"expresion": "molesta",
+			"espera": 1.0
+		},
+		{
+			"nombre": "Ella",
+			"texto": "Ponlo en tu currículum: impaciencia crónica.",
+			"expresion": "confundida",
+			"espera": 1.6
+		},
+		{
+			"nombre": "Ella",
+			"texto": "Búscate a otra.",
+			"expresion": "ojos_cerrados",
 			"espera": 1.3
 		}
 	]
@@ -1671,7 +1677,6 @@ func terminar_minuto() -> void:
 	juego_terminado = true
 	minuto_iniciado = false
 
-	congelado = false
 	esperando_siguiente_tramo = false
 
 	pregunta_activa = ""
@@ -1861,28 +1866,6 @@ func construir_cuerpo_final() -> Array:
 	elif not final_especial.is_empty():
 		return final_especial
 
-	elif modo_rabia:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": str(cantidad_clicks) + " clics.",
-				"expresion": "molesta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Qué frágil es el autocontrol.",
-				"expresion": "confundida",
-				"espera": 1.4
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ponlo en tu currículum.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			}
-		]
-
 	elif ruta_reto_activa and reto_completado:
 		return [
 			{
@@ -1896,6 +1879,18 @@ func construir_cuerpo_final() -> Array:
 				"texto": "Cumpliste el reto.",
 				"expresion": "confundida",
 				"espera": 1.1
+			},
+			{
+				"nombre": "Ella",
+				"texto": "Dedicación, buena puntería y nada de vida social.",
+				"expresion": "confundida",
+				"espera": 1.5
+			},
+			{
+				"nombre": "Ella",
+				"texto": "Un currículum interesante, la verdad.",
+				"expresion": "coqueta",
+				"espera": 1.4
 			},
 			{
 				"nombre": "Ella",
@@ -2181,20 +2176,37 @@ func bloque_despedida() -> Array:
 	]
 
 	# Solo si el final de ESTA partida fue "cumpliste el reto"
-	# (no aplica a ningún otro final).
+	# (no aplica a ningún otro final). Se sugiere un número que
+	# todavía no hayas alcanzado antes; si ya los viste todos,
+	# simplemente no se agrega nada.
 	if ruta_reto_activa and reto_completado:
-		var numero_sugerido: int = NUMEROS_ESPECIALES.pick_random()
+		var disponibles: Array = NUMEROS_ESPECIALES.filter(
+			func(n): return not progreso["numeros_especiales_vistos"].has(n)
+		)
 
-		bloque.append({
-			"nombre": "Ella",
-			"texto": (
-				"Para la próxima, intenta un número justo. Como "
-				+ str(numero_sugerido)
-				+ ". Ni uno más, ni uno menos."
-			),
-			"expresion": "coqueta",
-			"espera": 1.9
-		})
+		if not disponibles.is_empty():
+			var numero_sugerido: int = disponibles.pick_random()
+
+			# Si la pista de arriba fue "no clickees nada", esta
+			# sugerencia sonaría contradictoria sin una transición.
+			if pista_es_no_clickees():
+				bloque.append({
+					"nombre": "Ella",
+					"texto": "O quizás podrías...",
+					"expresion": "confundida",
+					"espera": 1.0
+				})
+
+			bloque.append({
+				"nombre": "Ella",
+				"texto": (
+					"Para la próxima, intenta un número justo. Como "
+					+ str(numero_sugerido)
+					+ ". Ni uno más, ni uno menos."
+				),
+				"expresion": "coqueta",
+				"espera": 1.9
+			})
 
 	bloque.append({
 		"nombre": "Ella",
@@ -2209,6 +2221,17 @@ func bloque_despedida() -> Array:
 # =========================================================
 # PISTAS
 # =========================================================
+
+# Sirve para saber si la pista que se va a mostrar es
+# justo la de "no clickees nada" — es el único caso donde
+# choca con la sugerencia de número especial, así que ahí
+# se agrega una línea puente en bloque_despedida().
+func pista_es_no_clickees() -> bool:
+	if ruta_zen and not progreso["vio_reto_completado"]:
+		return false
+
+	return not progreso["vio_zen"]
+
 
 func obtener_linea_pista() -> Dictionary:
 	# Si esta partida terminó en zen y todavía no completaste
@@ -2233,9 +2256,9 @@ func obtener_linea_pista() -> Dictionary:
 	elif not progreso["vio_romantica"]:
 		return {
 			"nombre": "Ella",
-			"texto": "A veces alcanza con responder a tiempo.",
+			"texto": "La próxima, prueba contestar cada vez que te pregunte algo, no solo una vez.",
 			"expresion": "sonrojada",
-			"espera": 1.8
+			"espera": 2.0
 		}
 
 	elif not progreso["vio_indecisa"]:
@@ -2246,12 +2269,12 @@ func obtener_linea_pista() -> Dictionary:
 			"espera": 1.8
 		}
 
-	elif not progreso["vio_rabia"]:
+	elif not progreso["vio_impaciente"]:
 		return {
 			"nombre": "Ella",
-			"texto": "La próxima vez, sé bastante más brusco con el botón.",
+			"texto": "La próxima vez, no esperes a que empiece el minuto para clickear como loco.",
 			"expresion": "confundida",
-			"espera": 1.7
+			"espera": 1.9
 		}
 
 	elif not progreso["vio_reto_completado"]:
@@ -2295,14 +2318,14 @@ func actualizar_progreso() -> void:
 	if ruta_romantica:
 		progreso["vio_romantica"] = true
 
-	if modo_rabia:
-		progreso["vio_rabia"] = true
-
 	if ruta_reto_activa and reto_completado:
 		progreso["vio_reto_completado"] = true
 
 	if ruta_perdedor:
 		progreso["vio_perdedor"] = true
+
+	if cantidad_clicks in NUMEROS_ESPECIALES and not progreso["numeros_especiales_vistos"].has(cantidad_clicks):
+		progreso["numeros_especiales_vistos"].append(cantidad_clicks)
 
 
 func guardar_progreso() -> void:
@@ -2348,10 +2371,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			"vio_zen": false,
 			"vio_indecisa": false,
 			"vio_romantica": false,
-			"vio_rabia": false,
+			"vio_impaciente": false,
 			"vio_reto_completado": false,
 			"vio_perdedor": false,
-			"partidas_jugadas": 0
+			"partidas_jugadas": 0,
+			"numeros_especiales_vistos": []
 		}
 
 		if FileAccess.file_exists(SAVE_PATH):
