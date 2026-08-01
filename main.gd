@@ -747,7 +747,12 @@ func iniciar_pregunta(tipo: String, duracion: float) -> void:
 	# El primer clic del tutorial ("haz clic si me estás
 	# escuchando") sigue siendo especial: es tanto la
 	# respuesta a la pregunta como el primer clic contado.
-	if tipo == "tutorial":
+	# Lo mismo aplica para el clic que confirma la cita: si el
+	# jugador clickea para aceptar, ese clic también es un clic
+	# real y debe sumar al contador (antes no contaba, lo que
+	# dejaba el total desincronizado con lo que el jugador
+	# efectivamente hizo).
+	if tipo == "tutorial" or tipo == "cita":
 		conteo_clicks_habilitado = true
 
 	var token_actual := pregunta_token
@@ -996,6 +1001,17 @@ func resolver_cita(respondio: bool) -> void:
 	if respondio and confirmo_que_escucha and not romance_bloqueado:
 		ruta_romantica = true
 
+		# A partir de acá el minuto deja de importar: la ruta
+		# ya quedó resuelta con esta respuesta. Se congela el
+		# reloj (para que no siga corriendo ni corte el diálogo
+		# a la mitad) y se oculta, para reforzar que el
+		# experimento del minuto ya terminó y ahora solo queda
+		# la conversación. decidir_siguiente_bloque() se encarga
+		# de esperar a que termine todo el diálogo antes de
+		# llamar a terminar_minuto().
+		timer.stop()
+		reloj.visible = false
+
 		insertar_despues([
 			{
 				"nombre": "Ella",
@@ -1043,6 +1059,13 @@ func resolver_cita(respondio: bool) -> void:
 
 	elif not respondio and confirmo_que_escucha:
 		ruta_cobarde = true
+
+		# Misma lógica que en la ruta romántica: la respuesta
+		# (o la falta de ella) ya definió el final, así que el
+		# reloj se congela y se oculta para que el diálogo se
+		# vea completo sin que el minuto lo corte.
+		timer.stop()
+		reloj.visible = false
 
 		insertar_despues([
 			{
@@ -1145,6 +1168,18 @@ func esperar_siguiente_tramo() -> void:
 
 func decidir_siguiente_bloque() -> void:
 	if juego_terminado:
+		return
+
+	# Romántica y cobarde ya no dependen del reloj ni del reto:
+	# la ruta quedó resuelta apenas el jugador respondió (o no)
+	# la pregunta de la cita (ver resolver_cita, donde además se
+	# congela y oculta el reloj). No importa en qué bloque estemos
+	# ni cuánto tiempo quede: apenas termina de mostrarse todo el
+	# diálogo insertado, se cierra el minuto directamente, sin
+	# esperar al cronómetro y sin riesgo de que se corte a mitad
+	# de camino.
+	if ruta_romantica or ruta_cobarde:
+		terminar_minuto()
 		return
 
 	if reto_anunciado:
@@ -1479,21 +1514,15 @@ func bloque_2_perdedor() -> Array:
 # =========================================================
 
 func bloque_3_final() -> Array:
+	# Romántica y cobarde: la ruta ya quedó resuelta apenas
+	# se respondió (o no) la pregunta de la cita. No hay
+	# filler que mostrar acá — se va directo a
+	# decidir_siguiente_bloque(), que para estas rutas cierra
+	# el minuto de inmediato (ver más arriba). Esto evita
+	# repetir el mismo sentimiento dos veces ("Ya dije lo que
+	# tenía que decir" seguido de "Ya tienes mi respuesta").
 	if ruta_romantica or ruta_cobarde:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Bueno.",
-				"expresion": "neutral",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ya dije lo que tenía que decir.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			}
-		]
+		return []
 
 	if ruta_zen:
 		return [
@@ -1561,7 +1590,7 @@ func bloque_3_final() -> Array:
 			},
 			{
 				"nombre": "Ella",
-				"texto": "Métele caña. Quiero ver cuántos clics más haces antes de que se acabe.",
+				"texto": "Sigue si quieres. No te voy a decir que pares.",
 				"expresion": "molesta",
 				"espera": 1.6
 			}
@@ -1710,7 +1739,7 @@ func construir_bloque_final() -> Array:
 # 69 clics debe seguir siendo el final romántico).
 func construir_cuerpo_final() -> Array:
 	var final_especial := obtener_final_numero_especial()
-
+#final ruta romantica
 	if ruta_romantica:
 		return [
 			{
@@ -1721,9 +1750,9 @@ func construir_cuerpo_final() -> Array:
 			},
 			{
 				"nombre": "Ella",
-				"texto": "Ya tienes mi respuesta.",
+				"texto": "Ya sabes que si te llegara a ver de nuevo... no te diría que no.",
 				"expresion": "sonrojada",
-				"espera": 1.3
+				"espera": 1.8
 			},
 			{
 				"nombre": "Ella",
@@ -1738,7 +1767,7 @@ func construir_cuerpo_final() -> Array:
 				"espera": 1.3
 			}
 		]
-
+#final ruta cobarde
 	elif ruta_cobarde:
 		return [
 			{
@@ -1766,7 +1795,7 @@ func construir_cuerpo_final() -> Array:
 				"espera": 1.1
 			}
 		]
-
+#final ruta zen
 	elif ruta_zen:
 		return [
 			{
@@ -1806,7 +1835,7 @@ func construir_cuerpo_final() -> Array:
 				"espera": 1.3
 			}
 		]
-
+#final ruta indecisa con 1 click
 	elif ruta_indecisa and cantidad_clicks <= 1:
 		return [
 			{
@@ -1834,7 +1863,7 @@ func construir_cuerpo_final() -> Array:
 				"espera": 1.5
 			}
 		]
-
+#final ruta indecisa varios clicks
 	elif ruta_indecisa:
 		return [
 			{
@@ -1865,7 +1894,7 @@ func construir_cuerpo_final() -> Array:
 
 	elif not final_especial.is_empty():
 		return final_especial
-
+#final reto completado
 	elif ruta_reto_activa and reto_completado:
 		return [
 			{
@@ -1899,7 +1928,7 @@ func construir_cuerpo_final() -> Array:
 				"espera": 1.5
 			}
 		]
-
+#final ruta perdedor
 	elif ruta_perdedor:
 		if ruta_reto_activa:
 			# Perdió en el segundo tramo, después de haber
