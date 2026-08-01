@@ -18,7 +18,7 @@ extends Control
 # =========================================================
 # CONSTANTES
 # =========================================================
-
+const MENU_PATH := "res://Menu.tscn"
 const SPRITE_BASE := "res://sprites/"
 const SPRITE_DEFAULT := "ella_neutral.png"
 
@@ -531,6 +531,9 @@ func avanzar_dialogo() -> void:
 	else:
 		terminar_bloque_dialogos()
 
+func volver_al_menu() -> void:
+	await get_tree().create_timer(1.0).timeout
+	get_tree().change_scene_to_file(MENU_PATH)
 
 func terminar_bloque_dialogos() -> void:
 	match fase_actual:
@@ -542,8 +545,7 @@ func terminar_bloque_dialogos() -> void:
 				decidir_siguiente_bloque()
 
 		"final":
-			pass
-
+			volver_al_menu()
 
 func cargar_bloque(bloque: Array) -> void:
 	if juego_terminado and fase_actual != "final":

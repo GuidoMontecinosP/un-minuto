@@ -88,6 +88,7 @@ offset_top = 280.0
 offset_right = 1062.0
 offset_bottom = 412.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 96
 text = "10"
 
@@ -116,6 +117,7 @@ offset_left = 960.0
 offset_top = 416.0
 offset_right = 1153.0
 offset_bottom = 485.0
+theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 50
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
