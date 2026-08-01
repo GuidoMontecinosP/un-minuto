@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://bhh2k4rsjjxke"]
+
+[ext_resource type="Texture2D" uid="uid://beydb1s66dbyc" path="res://Fondo/Fondo.png" id="1_lti8b"]
+[ext_resource type="Script" uid="uid://bvxvhrva3tyga" path="res://menu.gd" id="1_ouk20"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lti8b"]
+bg_color = Color(0, 0, 0, 0.74509805)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ouk20"]
+bg_color = Color(0, 0, 0, 0.74509805)
+
+[node name="Menu" type="Control" unique_id=706376327]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ouk20")
+
+[node name="Fondo" type="TextureRect" parent="." unique_id=913639702]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1240.0
+offset_bottom = 680.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_lti8b")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Oscurecer" type="ColorRect" parent="." unique_id=721166356]
+visible = false
+layout_mode = 0
+offset_right = 1288.0
+offset_bottom = 744.0
+color = Color(0, 0, 0, 0.16078432)
+
+[node name="Contenido" type="VBoxContainer" parent="." unique_id=1693732991]
+layout_mode = 0
+offset_left = 256.0
+offset_top = 136.0
+offset_right = 1024.0
+offset_bottom = 736.0
+theme_override_constants/separation = 100
+
+[node name="Titulos" type="VBoxContainer" parent="Contenido" unique_id=1236554978]
+layout_mode = 2
+
+[node name="Titulo" type="Label" parent="Contenido/Titulos" unique_id=1661454711]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 120
+text = " UN MINUTO"
+metadata/_edit_group_ = true
+
+[node name="Subtitulo" type="Label" parent="Contenido/Titulos" unique_id=2029203780]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 50
+text = "Tienes un minuto"
+
+[node name="Botones" type="VBoxContainer" parent="Contenido" unique_id=323782536]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BotonJugar" type="Button" parent="Contenido/Botones" unique_id=897194927]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="BotonSalir" type="Button" parent="Contenido/Botones" unique_id=1726137387]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_ouk20")
+text = "Salir"
