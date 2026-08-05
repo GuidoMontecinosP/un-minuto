@@ -132,6 +132,7 @@ var progreso := {
 	"vio_indecisa": false,
 	"vio_romantica": false,
 	"vio_impaciente": false,
+	"vio_cobarde": false,
 	"vio_reto_completado": false,
 	"vio_perdedor": false,
 	"partidas_jugadas": 0,
@@ -2354,6 +2355,9 @@ func actualizar_progreso() -> void:
 
 	if ruta_perdedor:
 		progreso["vio_perdedor"] = true
+		
+	if ruta_cobarde:
+		progreso["vio_cobarde"] = true
 
 	if cantidad_clicks in NUMEROS_ESPECIALES and not progreso["numeros_especiales_vistos"].has(cantidad_clicks):
 		progreso["numeros_especiales_vistos"].append(cantidad_clicks)
@@ -2404,6 +2408,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			"vio_romantica": false,
 			"vio_impaciente": false,
 			"vio_reto_completado": false,
+			"vio_cobarde": false,
 			"vio_perdedor": false,
 			"partidas_jugadas": 0,
 			"numeros_especiales_vistos": []

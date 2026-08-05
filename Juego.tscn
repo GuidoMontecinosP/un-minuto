@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://bjjpuuhselwcv"]
 
 [ext_resource type="Script" uid="uid://dhrd0yhf4uve1" path="res://juego.gd" id="1_aio1g"]
-[ext_resource type="Texture2D" uid="uid://beydb1s66dbyc" path="res://Fondo/Fondo.png" id="2_sbve1"]
+[ext_resource type="Texture2D" uid="uid://b05qif4yl2apm" path="res://Fondo/Fondo ubb.png" id="2_sbve1"]
 [ext_resource type="Texture2D" uid="uid://bk8sdnl4d1xsu" path="res://sprites/ella_ojos_cerrados2.png" id="3_5q1ir"]
+[ext_resource type="AudioStream" uid="uid://x8ni4b5ig1dl" path="res://Musica/ニセモノだっ！.mp3" id="4_sbve1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h2yge"]
 bg_color = Color(0, 0, 0, 0.74509805)
@@ -95,7 +96,6 @@ text = "10"
 [node name="Timer" type="Timer" parent="." unique_id=1238000626]
 
 [node name="Avanzar" type="Button" parent="." unique_id=707139017]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -119,6 +119,10 @@ offset_right = 1153.0
 offset_bottom = 485.0
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 50
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=657026687]
+stream = ExtResource("4_sbve1")
+autoplay = true
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="Avanzar" to="." method="_on_avanzar_pressed"]

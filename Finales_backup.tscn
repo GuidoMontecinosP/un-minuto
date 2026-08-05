@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cc8dsw7lie38v"]
+
+[ext_resource type="Script" uid="uid://b22dlua8avey6" path="res://finales.gd" id="1_yunsy"]
+[ext_resource type="Texture2D" uid="uid://beydb1s66dbyc" path="res://Fondo/Fondo.png" id="2_vt3j0"]
+
+[node name="Finales" type="Control" unique_id=83877114]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_yunsy")
+
+[node name="Fondo" type="TextureRect" parent="." unique_id=27961306]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_vt3j0")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Oscurecer" type="ColorRect" parent="." unique_id=705692393]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.16078432)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=315030940]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 1272.0
+offset_bottom = 712.0
+
+[node name="Contenido" type="VBoxContainer" parent="CenterContainer" unique_id=526497843]
+layout_mode = 2
+
+[node name="Titulo" type="Label" parent="CenterContainer/Contenido" unique_id=1842422147]
+layout_mode = 2
+theme_override_font_sizes/font_size = 120
+text = "Finales"
+
+[node name="Contador" type="Label" parent="CenterContainer/Contenido" unique_id=1785937723]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Contador"
+
+[node name="ListaFinales" type="Label" parent="CenterContainer/Contenido" unique_id=1553079087]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "ListaFinales"
+
+[node name="BotonVolver" type="Button" parent="CenterContainer/Contenido" unique_id=315508570]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Volver"

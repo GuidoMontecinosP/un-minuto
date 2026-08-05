@@ -1,12 +1,19 @@
 [gd_scene format=3 uid="uid://bhh2k4rsjjxke"]
 
-[ext_resource type="Texture2D" uid="uid://beydb1s66dbyc" path="res://Fondo/Fondo.png" id="1_lti8b"]
 [ext_resource type="Script" uid="uid://bvxvhrva3tyga" path="res://menu.gd" id="1_ouk20"]
+[ext_resource type="Texture2D" uid="uid://b05qif4yl2apm" path="res://Fondo/Fondo ubb.png" id="2_mae5d"]
+[ext_resource type="AudioStream" uid="uid://esr67sxhlib4" path="res://Musica/静かな竹林.mp3" id="3_mae5d"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lti8b"]
 bg_color = Color(0, 0, 0, 0.74509805)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ouk20"]
+bg_color = Color(0, 0, 0, 0.74509805)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mae5d"]
+bg_color = Color(0, 0, 0, 0.74509805)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4hy44"]
 bg_color = Color(0, 0, 0, 0.74509805)
 
 [node name="Menu" type="Control" unique_id=706376327]
@@ -27,18 +34,18 @@ offset_right = 1240.0
 offset_bottom = 680.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_lti8b")
+texture = ExtResource("2_mae5d")
 expand_mode = 1
 stretch_mode = 6
 
 [node name="Oscurecer" type="ColorRect" parent="." unique_id=721166356]
-visible = false
 layout_mode = 0
 offset_right = 1288.0
 offset_bottom = 744.0
 color = Color(0, 0, 0, 0.16078432)
 
-[node name="Contenido" type="VBoxContainer" parent="." unique_id=1693732991]
+[node name="ContenidoPrincipal" type="VBoxContainer" parent="." unique_id=1693732991]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -53,10 +60,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 100
 
-[node name="Titulos" type="VBoxContainer" parent="Contenido" unique_id=1236554978]
+[node name="Titulos" type="VBoxContainer" parent="ContenidoPrincipal" unique_id=1236554978]
 layout_mode = 2
 
-[node name="Titulo" type="Label" parent="Contenido/Titulos" unique_id=1661454711]
+[node name="Titulo" type="Label" parent="ContenidoPrincipal/Titulos" unique_id=1661454711]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/outline_size = 8
@@ -64,26 +71,78 @@ theme_override_font_sizes/font_size = 120
 text = " UN MINUTO"
 metadata/_edit_group_ = true
 
-[node name="Subtitulo" type="Label" parent="Contenido/Titulos" unique_id=2029203780]
+[node name="Subtitulo" type="Label" parent="ContenidoPrincipal/Titulos" unique_id=2029203780]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 50
 text = "No es tanto tiempo."
 
-[node name="Botones" type="VBoxContainer" parent="Contenido" unique_id=323782536]
+[node name="Botones" type="VBoxContainer" parent="ContenidoPrincipal" unique_id=323782536]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="BotonJugar" type="Button" parent="Contenido/Botones" unique_id=897194927]
+[node name="BotonJugar" type="Button" parent="ContenidoPrincipal/Botones" unique_id=897194927]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
 text = "Jugar"
 
-[node name="BotonSalir" type="Button" parent="Contenido/Botones" unique_id=1726137387]
+[node name="BotonFinales" type="Button" parent="ContenidoPrincipal/Botones" unique_id=1003654663]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Finales"
+
+[node name="BotonSalir" type="Button" parent="ContenidoPrincipal/Botones" unique_id=1726137387]
 layout_mode = 2
 size_flags_vertical = 8
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_ouk20")
 text = "Salir"
+
+[node name="ContenidoFinales" type="CenterContainer" parent="." unique_id=1269631998]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 1272.0
+offset_bottom = 712.0
+
+[node name="Contenido" type="VBoxContainer" parent="ContenidoFinales" unique_id=1611344511]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TituloFinales" type="Label" parent="ContenidoFinales/Contenido" unique_id=1841945437]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 120
+text = "Finales"
+
+[node name="ContadorFinales" type="Label" parent="ContenidoFinales/Contenido" unique_id=624329092]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 30
+text = "Contador"
+
+[node name="PanelFinales" type="PanelContainer" parent="ContenidoFinales/Contenido" unique_id=138559303]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mae5d")
+
+[node name="ListaFinales" type="Label" parent="ContenidoFinales/Contenido/PanelFinales" unique_id=600657301]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "ListaFinales"
+
+[node name="BotonVolver" type="Button" parent="ContenidoFinales/Contenido" unique_id=1497976211]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_4hy44")
+text = "Volver"
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=832108479]
+stream = ExtResource("3_mae5d")
+autoplay = true
+parameters/looping = true
