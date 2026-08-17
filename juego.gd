@@ -438,7 +438,7 @@ func intro_replay_corta() -> Array:
 # =========================================================
 
 func _ready() -> void:
-	cargar_progreso()
+	progreso = SaveManager.cargar(SAVE_PATH, progreso)
 
 	timer.wait_time = 1.0
 	timer_texto.wait_time = velocidad_texto
@@ -1655,7 +1655,7 @@ func activar_final_impaciente() -> void:
 	# progreso se actualiza y guarda acá mismo.
 	progreso["partidas_jugadas"] += 1
 	progreso["vio_impaciente"] = true
-	guardar_progreso()
+	SaveManager.guardar(SAVE_PATH, progreso)
 
 	cargar_bloque(bloque_impaciente())
 
@@ -1733,7 +1733,7 @@ func terminar_minuto() -> void:
 
 func construir_bloque_final() -> Array:
 	actualizar_progreso()
-	guardar_progreso()
+	SaveManager.guardar(SAVE_PATH, progreso)
 
 	var bloque := construir_cuerpo_final()
 	bloque.append_array(bloque_despedida())
@@ -2369,17 +2369,9 @@ func actualizar_progreso() -> void:
 		progreso["numeros_especiales_vistos"].append(cantidad_clicks)
 
 
-func guardar_progreso() -> void:
-	var archivo := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-
-	if archivo:
-		archivo.store_var(progreso)
-		archivo.close()
 
 
-func cargar_progreso() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return
+
 
 	var archivo := FileAccess.open(SAVE_PATH, FileAccess.READ)
 
