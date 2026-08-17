@@ -1,6 +1,4 @@
 extends Control
-
-
 # =========================================================
 # NODOS
 # =========================================================
@@ -13,7 +11,6 @@ extends Control
 @onready var timer_auto_avance = $TimerAutoAvance
 @onready var chica = $Chica
 @onready var contador_clicks = $ContadorClicks
-
 
 # =========================================================
 # CONSTANTES
@@ -57,8 +54,6 @@ var esperando_siguiente_tramo := false
 
 var velocidad_texto := 0.045
 var tiempo_entre_dialogos := 1.15
-
-
 # =========================================================
 # CLICS
 # =========================================================
@@ -73,7 +68,6 @@ var conteo_clicks_habilitado := false
 # reto — solo sirven para detectar impaciencia.
 var clicks_antes_del_minuto := 0
 var ruta_impaciente := false
-
 
 # =========================================================
 # TRAMOS / RETO
@@ -145,292 +139,20 @@ var progreso := {
 # El minuto todavía no comienza.
 # =========================================================
 
-var dialogos_introduccion := [
-	{
-		"nombre": "Ella",
-		"texto": "¡Ah—!",
-		"expresion": "sorprendida",
-		"espera": 0.6
-	},
-	{
-		"nombre": "Ella",
-		"texto": "...",
-		"expresion": "molesta",
-		"espera": 0.7
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Genial.",
-		"expresion": "molesta",
-		"espera": 0.8
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Choqué contigo.",
-		"expresion": "neutral",
-		"espera": 0.9
-	},
-	{
-		"nombre": "Ella",
-		"texto": "No pongas esa cara.",
-		"expresion": "confundida",
-		"espera": 0.9
-	},
-	{
-		"nombre": "Ella",
-		"texto": "También fue culpa mía.",
-		"expresion": "neutral",
-		"espera": 1.0
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Iba tarde.",
-		"expresion": "neutral",
-		"espera": 0.8
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Ahora voy tarde contigo.",
-		"expresion": "coqueta",
-		"espera": 1.1
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Qué romántico.",
-		"expresion": "coqueta",
-		"espera": 1.0
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Y apareció eso.",
-		"expresion": "confundida",
-		"mostrar_reloj": true,
-		"espera": 0.9
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Un minuto.",
-		"expresion": "neutral",
-		"espera": 0.9
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Conmigo.",
-		"expresion": "coqueta",
-		"espera": 1.0
-	},
-	{
-		"nombre": "Ella",
-		"texto": "Podría ser peor.",
-		"expresion": "neutral",
-		"espera": 1.0
-	}
-]
-
-
 func construir_intro_replay() -> Array:
 	var num: int = progreso["partidas_jugadas"]
 
 	if num == 1:
-		return intro_replay_1()
+		return DialogosUnMinuto.intro_replay_1()
 	elif num == 2:
-		return intro_replay_2()
+		return DialogosUnMinuto.intro_replay_2()
 	elif num == 3:
-		return intro_replay_3()
+		return DialogosUnMinuto.intro_replay_3()
 	elif num <= 9:
-		return intro_replay_generica(num + 1)
+		return DialogosUnMinuto.intro_replay_generica(num + 1)
 	else:
-		return intro_replay_corta()
+		return DialogosUnMinuto.intro_replay_corta()
 
-
-func intro_replay_1() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "¿Tú otra vez?",
-			"expresion": "confundida",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Qué casualidad.",
-			"expresion": "coqueta",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "O no tanto.",
-			"expresion": "molesta",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Bueno.",
-			"expresion": "neutral",
-			"espera": 0.8
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Otra vez apareció eso.",
-			"expresion": "confundida",
-			"mostrar_reloj": true,
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Un minuto.",
-			"expresion": "neutral",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Otra vez conmigo.",
-			"expresion": "coqueta",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Vamos a ver si esta vez sale distinto.",
-			"expresion": "neutral",
-			"espera": 1.3
-		}
-	]
-
-
-func intro_replay_2() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Otra vez tú.",
-			"expresion": "confundida",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Empiezo a pensar que esto no es casualidad.",
-			"expresion": "coqueta",
-			"espera": 1.4
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Bueno, no me quejo.",
-			"expresion": "sonrojada",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ahí está el minuto de nuevo.",
-			"expresion": "neutral",
-			"mostrar_reloj": true,
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "A ver qué haces esta vez.",
-			"expresion": "coqueta",
-			"espera": 1.2
-		}
-	]
-
-
-func intro_replay_3() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Tercera vez.",
-			"expresion": "sorprendida",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "¿Vienes seguido por aquí?",
-			"expresion": "coqueta",
-			"espera": 1.2
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Es broma.",
-			"expresion": "neutral",
-			"espera": 0.8
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Sé que sí.",
-			"expresion": "molesta",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ahí está tu minuto otra vez.",
-			"expresion": "neutral",
-			"mostrar_reloj": true,
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Sorpréndeme.",
-			"expresion": "coqueta",
-			"espera": 1.0
-		}
-	]
-
-
-# Para las repeticiones 4 a 9: texto genérico pero que
-# menciona el número real de partidas.
-func intro_replay_generica(num: int) -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Van " + str(num) + " veces.",
-			"expresion": "confundida",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "A este ritmo vamos a terminar viviendo juntos.",
-			"expresion": "coqueta",
-			"espera": 1.4
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Bueno.",
-			"expresion": "neutral",
-			"espera": 0.7
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ahí está tu minuto.",
-			"expresion": "neutral",
-			"mostrar_reloj": true,
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Otra vez.",
-			"expresion": "coqueta",
-			"espera": 0.9
-		}
-	]
-
-
-# Desde la partida número 10 en adelante: intro corta,
-# vamos directo al grano.
-func intro_replay_corta() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Tú de nuevo.",
-			"expresion": "neutral",
-			"espera": 0.8
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ya sabes cómo va esto.",
-			"expresion": "coqueta",
-			"mostrar_reloj": true,
-			"espera": 0.9
-		}
-	]
 
 
 # =========================================================
@@ -447,7 +169,11 @@ func _ready() -> void:
 	contador_clicks.visible = false
 	contador_clicks.text = "Clics: 0"
 
-	dialogos_actuales = dialogos_introduccion if progreso["partidas_jugadas"] == 0 else construir_intro_replay()
+	dialogos_actuales = (
+	DialogosUnMinuto.intro_inicial()
+	if progreso["partidas_jugadas"] == 0
+	else construir_intro_replay()
+)
 	indice = 0
 
 	mostrar_dialogo()
@@ -617,7 +343,7 @@ func iniciar_minuto() -> void:
 
 	timer.start()
 
-	cargar_bloque(bloque_1())
+	cargar_bloque(DialogosUnMinuto.bloque_1())
 
 
 func actualizar_reloj() -> void:
@@ -1243,7 +969,7 @@ func cerrar_bloque(numero: int) -> void:
 
 			# El número del segundo objetivo se calcula al
 			# mostrar la línea "anuncio_objetivo_siguiente"
-			# dentro de bloque_2_reto(), no acá. La ventana de
+			# dentro de DialogosUnMinuto.cargar_bloque(DialogosUnMinuto.bloque_2_reto()), no acá. La ventana de
 			# clickeo se vuelve a abrir en decidir_siguiente_bloque().
 			reto_anunciado = true
 			reto_deadline = -1.0
@@ -1251,7 +977,7 @@ func cerrar_bloque(numero: int) -> void:
 			clicks_bloque = 0
 			bloque_actual_numero = 2
 
-			cargar_bloque(bloque_2_reto())
+			cargar_bloque(DialogosUnMinuto.bloque_2_reto())
 		else:
 			# No llegó al objetivo. Hay dos casos bien distintos:
 			reto_anunciado = false
@@ -1265,20 +991,20 @@ func cerrar_bloque(numero: int) -> void:
 				# jamás aceptó ningún reto, así que va directo a
 				# su propia ruta zen, sin más preguntas.
 				ruta_zen = true
-				cargar_bloque(bloque_2_zen())
+				cargar_bloque(DialogosUnMinuto.bloque_2_zen())
 			elif cantidad_clicks > clicks_al_anunciar_reto:
 				# Sí aceptó el reto (siguió clickeando después de
 				# que se lo pidieron), pero no le alcanzó. Esto es
 				# perder el reto, no una ruta secreta.
 				ruta_perdedor = true
 				romance_bloqueado = true
-				cargar_bloque(bloque_2_perdedor())
+				cargar_bloque(DialogosUnMinuto.bloque_2_perdedor())
 			else:
 				# Respondió el tutorial pero no volvió a clickear
 				# ni una vez: nunca aceptó el reto en la práctica,
 				# así que todavía puede desviarse a la ruta
 				# romántica o caer en zen.
-				cargar_bloque(bloque_2_intento_fallido())
+				cargar_bloque(DialogosUnMinuto.bloque_2_intento_fallido())
 
 	elif numero == 2:
 		if ruta_reto_activa:
@@ -1311,211 +1037,6 @@ func calcular_siguiente_objetivo(clicks_actuales: int) -> int:
 
 	return max(doble, max(mas_veinte, minimo_seguro))
 
-
-# =========================================================
-# BLOQUE 1 — TUTORIAL
-# =========================================================
-
-func bloque_1() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Bueno.",
-			"expresion": "neutral",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Parece que tú no puedes hablar.",
-			"expresion": "confundida",
-			"espera": 1.3
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Conveniente para mí.",
-			"expresion": "coqueta",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Probemos algo.",
-			"expresion": "neutral",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Haz clic si me estás escuchando.",
-			"expresion": "coqueta",
-			"pregunta": "tutorial",
-			"ventana": 5.0
-		}
-	]
-
-
-# =========================================================
-# BLOQUE 2 — RETO ACEPTADO
-# =========================================================
-
-func bloque_2_reto() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Oh.",
-			"expresion": "sorprendida",
-			"espera": 0.8
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Cumpliste el reto.",
-			"expresion": "coqueta",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Vamos a subir la apuesta.",
-			"expresion": "molesta",
-			"espera": 1.2
-		},
-		{
-			"nombre": "Ella",
-			"tipo": "anuncio_objetivo_siguiente",
-			"expresion": "coqueta",
-			"espera": 1.4
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Y esta vez no te me relajes.",
-			"expresion": "molesta",
-			"espera": 1.1
-		}
-	]
-
-
-# =========================================================
-# BLOQUE 2 — SILENCIO TOTAL (ni siquiera respondió el tutorial)
-# Ruta zen: corre sola, sin más preguntas ni clics.
-# =========================================================
-
-func bloque_2_zen() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Ni un clic.",
-			"expresion": "confundida",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ni siquiera el primero.",
-			"expresion": "neutral",
-			"espera": 1.2
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Está bien.",
-			"expresion": "coqueta",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "De hecho, creo que ya ni podrías hacer clic aunque quisieras.",
-			"expresion": "confundida",
-			"espera": 1.6
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Entraste en un estado zen tan profundo que se te olvidó cómo funcionan los dedos.",
-			"expresion": "coqueta",
-			"espera": 1.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Voy a hablar sola entonces.",
-			"expresion": "confundida",
-			"espera": 1.3
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Se me da bien.",
-			"expresion": "coqueta",
-			"espera": 1.1
-		}
-	]
-
-
-# =========================================================
-# BLOQUE 2 — INTENTO FALLIDO (respondió el tutorial pero
-# nunca volvió a clickear: no llegó a aceptar el reto)
-# =========================================================
-
-func bloque_2_intento_fallido() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Hm.",
-			"expresion": "neutral",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ni lo intentaste.",
-			"expresion": "confundida",
-			"espera": 1.2
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Qué sospechosamente sensato.",
-			"expresion": "coqueta",
-			"espera": 1.3
-		},
-		{
-			"nombre": "Ella",
-			"texto": "A ver.",
-			"expresion": "neutral",
-			"espera": 0.8
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Haz clic si sigues ahí.",
-			"expresion": "coqueta",
-			"pregunta": "sigues_ahi",
-			"ventana": 5.0
-		}
-	]
-
-
-# =========================================================
-# BLOQUE 2 — PERDEDOR (aceptó el reto, siguió clickeando,
-# pero no le alcanzó para llegar al objetivo)
-# =========================================================
-
-func bloque_2_perdedor() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "Vaya.",
-			"expresion": "sorprendida",
-			"espera": 0.9
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Sí que lo intentaste.",
-			"expresion": "confundida",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Pero no te alcanzó.",
-			"expresion": "molesta",
-			"espera": 1.1
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Qué vergüenza, la verdad.",
-			"expresion": "coqueta",
-			"espera": 1.2
-		}
-	]
 
 
 # =========================================================
@@ -1657,54 +1178,9 @@ func activar_final_impaciente() -> void:
 	progreso["vio_impaciente"] = true
 	SaveManager.guardar(SAVE_PATH, progreso)
 
-	cargar_bloque(bloque_impaciente())
+	cargar_bloque(DialogosUnMinuto.bloque_impaciente())
 
 
-func bloque_impaciente() -> Array:
-	return [
-		{
-			"nombre": "Ella",
-			"texto": "...",
-			"expresion": "molesta",
-			"espera": 0.8
-		},
-		{
-			"nombre": "Ella",
-			"texto": "¿En serio?",
-			"expresion": "molesta",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ni siquiera ha empezado el minuto.",
-			"expresion": "confundida",
-			"espera": 1.3
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Y ya estás desesperado por hacer clic.",
-			"expresion": "molesta",
-			"espera": 1.4
-		},
-		{
-			"nombre": "Ella",
-			"texto": "No, gracias.",
-			"expresion": "molesta",
-			"espera": 1.0
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Ponlo en tu currículum: impaciencia crónica.",
-			"expresion": "confundida",
-			"espera": 1.6
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Búscate a otra.",
-			"expresion": "ojos_cerrados",
-			"espera": 1.3
-		}
-	]
 
 
 # =========================================================
@@ -2367,27 +1843,6 @@ func actualizar_progreso() -> void:
 
 	if cantidad_clicks in NUMEROS_ESPECIALES and not progreso["numeros_especiales_vistos"].has(cantidad_clicks):
 		progreso["numeros_especiales_vistos"].append(cantidad_clicks)
-
-
-
-
-
-
-	var archivo := FileAccess.open(SAVE_PATH, FileAccess.READ)
-
-	if not archivo:
-		return
-
-	var datos = archivo.get_var()
-	archivo.close()
-
-	if typeof(datos) != TYPE_DICTIONARY:
-		return
-
-	for clave in progreso.keys():
-		if datos.has(clave):
-			progreso[clave] = datos[clave]
-
 
 # =========================================================
 # DEBUG
