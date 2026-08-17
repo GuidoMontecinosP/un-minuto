@@ -13,7 +13,7 @@ config_version=5
 config/name="Un minuto"
 run/main_scene="uid://bhh2k4rsjjxke"
 config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://bbexkexcqi2cw"
 
 [display]
 

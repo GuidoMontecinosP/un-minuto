@@ -18,7 +18,7 @@ extends Control
 # =========================================================
 # CONSTANTES
 # =========================================================
-const MENU_PATH := "res://Menu.tscn"
+const MENU_PATH := "res://menu.tscn"
 const SPRITE_BASE := "res://sprites/"
 const SPRITE_DEFAULT := "ella_neutral.png"
 
@@ -534,7 +534,13 @@ func avanzar_dialogo() -> void:
 
 func volver_al_menu() -> void:
 	await get_tree().create_timer(1.0).timeout
-	get_tree().change_scene_to_file(MENU_PATH)
+
+	var error := get_tree().change_scene_to_file(MENU_PATH)
+
+	if error != OK:
+		push_error(
+			"No se pudo volver al menú. Código: " + str(error)
+		)
 
 func terminar_bloque_dialogos() -> void:
 	match fase_actual:

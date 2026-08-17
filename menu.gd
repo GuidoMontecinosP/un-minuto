@@ -111,21 +111,21 @@ func obtener_subtitulo() -> String:
 	)
 
 	if partidas_jugadas == 0:
-		return "Tienes un minuto."
+		return "Tienes un minuto"
 
 	if partidas_jugadas == 1:
 		return "¿Otra vez?"
 
 	if partidas_jugadas == 2:
-		return "Volviste."
+		return "Volviste"
 
 	if partidas_jugadas <= 5:
 		var frases_tempranas := [
-			"Solo es un minuto.",
+			"Solo es un minuto",
 			"¿Y ahora qué vas a intentar?",
-			"Pensé que pararías.",
-			"Sigues aquí.",
-			"Empieza a ser costumbre."
+			"Pensé que pararías",
+			"Sigues aquí",
+			"Empieza a ser costumbre"
 		]
 
 		return frases_tempranas.pick_random()
@@ -136,7 +136,7 @@ func obtener_subtitulo() -> String:
 		"¿Buscando otro final?",
 		"No creo que cambie mucho esta vez.",
 		"Yo también tendría curiosidad.",
-		"Aún no te rindes.",
+		"Aún no te rindes",
 		"Pensé que ya habías terminado conmigo."
 	]
 
