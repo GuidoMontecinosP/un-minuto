@@ -202,12 +202,16 @@ func mostrar_dialogo() -> void:
 		"anuncio_objetivo_inicial":
 			clicks_al_anunciar_reto = cantidad_clicks
 			objetivo_actual = cantidad_clicks + 10
-			texto_linea = "Quiero ver si llegas a " + str(objetivo_actual) + " clics."
+			texto_linea = DialogosUnMinuto.anuncio_objetivo_inicial(
+				objetivo_actual
+			)
 
 		"anuncio_objetivo_siguiente":
 			clicks_al_anunciar_reto = cantidad_clicks
 			objetivo_actual = calcular_siguiente_objetivo(cantidad_clicks)
-			texto_linea = "Esta vez quiero llegar a " + str(objetivo_actual) + "."
+			texto_linea = DialogosUnMinuto.anuncio_objetivo_siguiente(
+				objetivo_actual
+			)
 
 	texto.text = texto_linea
 
@@ -571,81 +575,13 @@ func resolver_tutorial(respondio: bool) -> void:
 		reto_deadline = -1.0
 		conteo_clicks_habilitado = false
 
-		insertar_despues([
-			{
-				"nombre": "Ella",
-				"texto": "Oh.",
-				"expresion": "sorprendida",
-				"espera": 0.8
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Sí me estabas escuchando.",
-				"expresion": "coqueta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Qué atento.",
-				"expresion": "coqueta",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Entonces ya tenemos un idioma.",
-				"expresion": "neutral",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Uno bastante limitado.",
-				"expresion": "confundida",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"tipo": "anuncio_objetivo_inicial",
-				"expresion": "coqueta",
-				"espera": 1.4
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Sin trampas.",
-				"expresion": "molesta",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Te reto.",
-				"expresion": "molesta",
-				"espera": 1.0
-			}
-		])
+		insertar_despues(DialogosUnMinuto.respuesta_tutorial_si())
 
 	else:
 		respondio_tutorial = false
 		conteo_clicks_habilitado = false
 
-		insertar_despues([
-			{
-				"nombre": "Ella",
-				"texto": "...",
-				"expresion": "confundida",
-				"espera": 0.9
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Bueno.",
-				"expresion": "neutral",
-				"espera": 0.9
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Esto va a ser una conversación difícil.",
-				"expresion": "coqueta",
-				"espera": 1.4
-			}
-		])
+		insertar_despues(DialogosUnMinuto.respuesta_tutorial_no())
 
 
 # =========================================================
@@ -656,77 +592,19 @@ func resolver_sigues_ahi(respondio: bool) -> void:
 	if respondio and not romance_bloqueado:
 		confirmo_que_escucha = true
 
-		insertar_despues([
-			{
-				"nombre": "Ella",
-				"texto": "Ah.",
-				"expresion": "sorprendida",
-				"espera": 0.8
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Sí estabas escuchando.",
-				"expresion": "coqueta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Todo un caballero.",
-				"expresion": "coqueta",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Tengo una pregunta.",
-				"expresion": "sonrojada",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Haz clic si aceptarías una cita conmigo.",
-				"expresion": "sonrojada",
-				"pregunta": "cita",
-				"ventana": 4.0
-			}
-		])
+		insertar_despues(
+			DialogosUnMinuto.respuesta_sigues_ahi_si()
+		)
 
 	else:
 		confirmo_que_escucha = false
 		ruta_indecisa = true
 
-		# A partir de acá los clics sí cuentan otra vez: si el
-		# jugador sigue clickeando sin que se le esté preguntando
-		# nada, eso es justo el gesto "maleducado" que describe
-		# el final de ruta_indecisa con más de un clic.
 		conteo_clicks_habilitado = true
 
-		insertar_despues([
-			{
-				"nombre": "Ella",
-				"texto": "...",
-				"expresion": "confundida",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Vaya.",
-				"expresion": "neutral",
-				"espera": 0.9
-			},
-			{
-				"nombre": "Ella",
-				"texto": "De verdad eres imperturbable.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "O estás AFK.",
-				"expresion": "confundida",
-				"espera": 1.2
-			}
-		])
-
+		insertar_despues(
+			DialogosUnMinuto.respuesta_sigues_ahi_no()
+		)
 
 # =========================================================
 # RESPUESTA A LA CITA
@@ -736,114 +614,25 @@ func resolver_cita(respondio: bool) -> void:
 	if respondio and confirmo_que_escucha and not romance_bloqueado:
 		ruta_romantica = true
 
-		# A partir de acá el minuto deja de importar: la ruta
-		# ya quedó resuelta con esta respuesta. Se congela el
-		# reloj (para que no siga corriendo ni corte el diálogo
-		# a la mitad) y se oculta, para reforzar que el
-		# experimento del minuto ya terminó y ahora solo queda
-		# la conversación. decidir_siguiente_bloque() se encarga
-		# de esperar a que termine todo el diálogo antes de
-		# llamar a terminar_minuto().
 		timer.stop()
 		reloj.visible = false
 
-		insertar_despues([
-			{
-				"nombre": "Ella",
-				"texto": "...",
-				"expresion": "muy_sonrojada",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Mira tú.",
-				"expresion": "coqueta",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Intentando ligar con un dibujo.",
-				"expresion": "coqueta",
-				"espera": 1.5
-			},
-			{
-				"nombre": "Ella",
-				"texto": "No sé si es triste...",
-				"expresion": "neutral",
-				"espera": 1.4
-			},
-			{
-				"nombre": "Ella",
-				"texto": "o atrevido.",
-				"expresion": "sonrojada",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Un poco de ambos.",
-				"expresion": "muy_sonrojada",
-				"espera": 1.4
-			},
-			{
-				"nombre": "Ella",
-				"texto": "No pongas esa cara.",
-				"expresion": "molesta",
-				"espera": 1.1
-			}
-		])
+		insertar_despues(
+			DialogosUnMinuto.respuesta_cita_si()
+		)
 
 	elif not respondio and confirmo_que_escucha:
 		ruta_cobarde = true
 
-		# Misma lógica que en la ruta romántica: la respuesta
-		# (o la falta de ella) ya definió el final, así que el
-		# reloj se congela y se oculta para que el diálogo se
-		# vea completo sin que el minuto lo corte.
 		timer.stop()
 		reloj.visible = false
 
-		insertar_despues([
-			{
-				"nombre": "Ella",
-				"texto": "...",
-				"expresion": "neutral",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Qué prudente.",
-				"expresion": "confundida",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "También qué inútil.",
-				"expresion": "molesta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Las oportunidades no suelen avisar dos veces.",
-				"expresion": "neutral",
-				"espera": 1.6
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Nunca sabes cuándo algo bueno iba a pasar.",
-				"expresion": "coqueta",
-				"espera": 1.6
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Cobarde.",
-				"expresion": "coqueta",
-				"espera": 1.0
-			}
-		])
+		insertar_despues(
+			DialogosUnMinuto.respuesta_cita_no()
+		)
 
 	else:
 		avanzar_dialogo()
-
 
 # =========================================================
 # TIMER PRINCIPAL
@@ -1044,112 +833,26 @@ func calcular_siguiente_objetivo(clicks_actuales: int) -> int:
 # =========================================================
 
 func bloque_3_final() -> Array:
-	# Romántica y cobarde: la ruta ya quedó resuelta apenas
-	# se respondió (o no) la pregunta de la cita. No hay
-	# filler que mostrar acá — se va directo a
-	# decidir_siguiente_bloque(), que para estas rutas cierra
-	# el minuto de inmediato (ver más arriba). Esto evita
-	# repetir el mismo sentimiento dos veces ("Ya dije lo que
-	# tenía que decir" seguido de "Ya tienes mi respuesta").
 	if ruta_romantica or ruta_cobarde:
 		return []
 
 	if ruta_zen:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Supongo que esto también funciona.",
-				"expresion": "neutral",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Yo hablo.",
-				"expresion": "confundida",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Tú contemplas el vacío.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Una conversación bastante eficiente.",
-				"expresion": "neutral",
-				"espera": 1.4
-			}
-		]
+		return DialogosUnMinuto.bloque_3_zen()
 
 	if ruta_indecisa:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Bueno.",
-				"expresion": "neutral",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ya veremos cómo termina esto.",
-				"expresion": "confundida",
-				"espera": 1.2
-			}
-		]
+		return DialogosUnMinuto.bloque_3_indecisa()
 
-	# CORREGIDO: antes esto se activaba con solo "ruta_reto_activa",
-	# lo que hacía que el jugador recibiera "métele caña" incluso
-	# cuando ya había perdido el segundo reto (ruta_reto_activa y
-	# ruta_perdedor pueden ser true al mismo tiempo). Ahora depende
-	# también de reto_completado, y el caso de haber perdido se
-	# maneja aparte, sin dar señales de que todavía hay esperanza.
 	if ruta_reto_activa and reto_completado:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": str(cantidad_clicks) + " clics y contando.",
-				"expresion": "confundida",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Cumpliste el reto.",
-				"expresion": "coqueta",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Sigue si quieres. No te voy a decir que pares.",
-				"expresion": "molesta",
-				"espera": 1.6
-			}
-		]
+		return DialogosUnMinuto.bloque_3_reto_completado(
+			cantidad_clicks
+		)
 
 	if ruta_perdedor:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": str(cantidad_clicks) + " clics.",
-				"expresion": "neutral",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "No llegaste.",
-				"expresion": "molesta",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ya no hay mucho más que hacer al respecto.",
-				"expresion": "confundida",
-				"espera": 1.3
-			}
-		]
+		return DialogosUnMinuto.bloque_3_perdedor(
+			cantidad_clicks
+		)
 
 	return []
-
 
 # =========================================================
 # RUTA IMPACIENTE (antes de que empiece el minuto)
@@ -1223,514 +926,79 @@ func construir_bloque_final() -> Array:
 # las rutas narrativas para no pisarlas (ej: romántica con
 # 69 clics debe seguir siendo el final romántico).
 func construir_cuerpo_final() -> Array:
-	var final_especial := obtener_final_numero_especial()
-#final ruta romantica
 	if ruta_romantica:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Bueno.",
-				"expresion": "coqueta",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ya sabes que si te llegara a ver de nuevo... no te diría que no.",
-				"expresion": "sonrojada",
-				"espera": 1.8
-			},
-			{
-				"nombre": "Ella",
-				"texto": "No la vayas a desperdiciar.",
-				"expresion": "molesta",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Nos vemos pronto, espero.",
-				"expresion": "sonrojada",
-				"espera": 1.3
-			}
-		]
-#final ruta cobarde
-	elif ruta_cobarde:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Bueno.",
-				"expresion": "neutral",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ya sabes lo que dejaste pasar.",
-				"expresion": "coqueta",
-				"espera": 1.4
-			},
-			{
-				"nombre": "Ella",
-				"texto": "La próxima, no lo pienses tanto.",
-				"expresion": "neutral",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "O sí. Tú sabrás.",
-				"expresion": "coqueta",
-				"espera": 1.1
-			}
-		]
-#final ruta zen
-	elif ruta_zen:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Ni uno.",
-				"expresion": "sorprendida",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Dejaste que todo pasara solo.",
-				"expresion": "neutral",
-				"espera": 1.5
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Debe ser cómodo.",
-				"expresion": "confundida",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "O aterrador.",
-				"expresion": "coqueta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "A veces no intentar también es una decisión.",
-				"expresion": "confundida",
-				"espera": 1.6
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Filosóficamente hablando, claro.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			}
-		]
-#final ruta indecisa con 1 click
-	elif ruta_indecisa and cantidad_clicks <= 1:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Un clic.",
-				"expresion": "confundida",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Uno solo.",
-				"expresion": "coqueta",
-				"espera": 0.9
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Y después nada.",
-				"expresion": "neutral",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Comprometido hasta cierto punto, ¿no?",
-				"expresion": "molesta",
-				"espera": 1.5
-			}
-		]
-#final ruta indecisa varios clicks
-	elif ruta_indecisa:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": str(cantidad_clicks) + " clics, pero a tu manera.",
-				"expresion": "confundida",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ignoraste mi pregunta...",
-				"expresion": "molesta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "pero seguiste clickeando igual.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Qué maleducado.",
-				"expresion": "molesta",
-				"espera": 1.0
-			}
-		]
+		return FinalesUnMinuto.romantico()
 
-	elif not final_especial.is_empty():
+	if ruta_cobarde:
+		return FinalesUnMinuto.cobarde()
+
+	if ruta_zen:
+		return FinalesUnMinuto.zen()
+
+	if ruta_indecisa and cantidad_clicks <= 1:
+		return FinalesUnMinuto.indecisa_un_click()
+
+	if ruta_indecisa:
+		return FinalesUnMinuto.indecisa_varios_clicks(
+			cantidad_clicks
+		)
+
+	var final_especial := FinalesUnMinuto.numero_especial(
+		cantidad_clicks
+	)
+
+	if not final_especial.is_empty():
 		return final_especial
-#final reto completado
-	elif ruta_reto_activa and reto_completado:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": str(cantidad_clicks) + " clics en total.",
-				"expresion": "molesta",
-				"espera": 1.2
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Cumpliste el reto.",
-				"expresion": "confundida",
-				"espera": 1.1
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Dedicación, buena puntería y nada de vida social.",
-				"expresion": "confundida",
-				"espera": 1.5
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Un currículum interesante, la verdad.",
-				"expresion": "coqueta",
-				"espera": 1.4
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Ojalá le pusieras esa dedicación a otras cosas.",
-				"expresion": "coqueta",
-				"espera": 1.5
-			}
-		]
-#final ruta perdedor
-	elif ruta_perdedor:
+
+	if ruta_reto_activa and reto_completado:
+		return FinalesUnMinuto.reto_completado(
+			cantidad_clicks
+		)
+
+	if ruta_perdedor:
 		if ruta_reto_activa:
-			# Perdió en el segundo tramo, después de haber
-			# pasado el primero.
-			return [
-				{
-					"nombre": "Ella",
-					"texto": str(cantidad_clicks) + " clics.",
-					"expresion": "neutral",
-					"espera": 1.1
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Tan cerca.",
-					"expresion": "confundida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Y aun así, no llegaste.",
-					"expresion": "molesta",
-					"espera": 1.3
-				}
-			]
-		else:
-			# Perdió directamente en el primer tramo.
-			return [
-				{
-					"nombre": "Ella",
-					"texto": str(cantidad_clicks) + " clics.",
-					"expresion": "neutral",
-					"espera": 1.1
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Aceptaste el reto...",
-					"expresion": "confundida",
-					"espera": 1.1
-				},
-				{
-					"nombre": "Ella",
-					"texto": "y lo perdiste.",
-					"expresion": "molesta",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Ni siquiera te pedí tanto.",
-					"expresion": "coqueta",
-					"espera": 1.3
-				}
-			]
+			return FinalesUnMinuto.perdedor_segundo_tramo(
+				cantidad_clicks
+			)
 
-	else:
-		return [
-			{
-				"nombre": "Ella",
-				"texto": "Eso fue...",
-				"expresion": "neutral",
-				"espera": 1.0
-			},
-			{
-				"nombre": "Ella",
-				"texto": "sorprendentemente normal.",
-				"expresion": "confundida",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "No sé si felicitarte.",
-				"expresion": "coqueta",
-				"espera": 1.3
-			},
-			{
-				"nombre": "Ella",
-				"texto": "Así que no lo haré.",
-				"expresion": "neutral",
-				"espera": 1.1
-			}
-		]
+		return FinalesUnMinuto.perdedor_primer_tramo(
+			cantidad_clicks
+		)
 
+	return FinalesUnMinuto.normal()
 
 # =========================================================
 # EASTER EGGS POR NÚMERO DE CLICS
 # =========================================================
 
-func obtener_final_numero_especial() -> Array:
-	match cantidad_clicks:
-		42:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "42 clics.",
-					"expresion": "confundida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "La respuesta a la vida, el universo y todo lo demás.",
-					"expresion": "coqueta",
-					"espera": 1.7
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Qué nerd.",
-					"expresion": "molesta",
-					"espera": 1.0
-				}
-			]
-
-		67:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "¿67 clics?",
-					"expresion": "molesta",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "¿Te crees chistosito?",
-					"expresion": "molesta",
-					"espera": 1.2
-				},
-				{
-					"nombre": "Ella",
-					"texto": "No entiendo este tipo de humor.",
-					"expresion": "confundida",
-					"espera": 1.3
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Y esta broma va a envejecer mal.",
-					"expresion": "neutral",
-					"espera": 1.3
-				}
-			]
-
-		69:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "69 clics.",
-					"expresion": "confundida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Qué madurez.",
-					"expresion": "molesta",
-					"espera": 1.1
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Ni siquiera lo hiciste a propósito, ¿verdad?",
-					"expresion": "coqueta",
-					"espera": 1.4
-				},
-				{
-					"nombre": "Ella",
-					"texto": "...",
-					"expresion": "neutral",
-					"espera": 0.8
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Sí lo hiciste.",
-					"expresion": "coqueta",
-					"espera": 1.0
-				}
-			]
-
-		77:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "77 clics.",
-					"expresion": "confundida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Número random elegido con mucho compromiso.",
-					"expresion": "coqueta",
-					"espera": 1.4
-				}
-			]
-
-		100:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "100 clics.",
-					"expresion": "sorprendida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Número redondo.",
-					"expresion": "coqueta",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Te gusta el orden, ¿eh?",
-					"expresion": "confundida",
-					"espera": 1.2
-				}
-			]
-
-		111:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "111 clics.",
-					"expresion": "confundida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Triple uno.",
-					"expresion": "sorprendida",
-					"espera": 0.9
-				},
-				{
-					"nombre": "Ella",
-					"texto": "¿Estás bien?",
-					"expresion": "coqueta",
-					"espera": 1.1
-				}
-			]
-
-		130:
-			return [
-				{
-					"nombre": "Ella",
-					"texto": "130 clics.",
-					"expresion": "sorprendida",
-					"espera": 1.0
-				},
-				{
-					"nombre": "Ella",
-					"texto": "Ya casi ni sé si esto sigue siendo un juego.",
-					"expresion": "coqueta",
-					"espera": 1.4
-				}
-			]
-
-		_:
-			return []
 
 
 func bloque_despedida() -> Array:
-	var bloque := [
-		{
-			"nombre": "Ella",
-			"texto": "Bueno... me tengo que ir.",
-			"expresion": "neutral",
-			"espera": 1.2
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Voy a llegar tarde.",
-			"expresion": "confundida",
-			"espera": 1.2
-		},
-		{
-			"nombre": "Ella",
-			"texto": "Otra vez.",
-			"expresion": "neutral",
-			"espera": 1.0
-		},
-		obtener_linea_pista()
-	]
+	var bloque := FinalesUnMinuto.despedida_base()
 
-	# Solo si el final de ESTA partida fue "cumpliste el reto"
-	# (no aplica a ningún otro final). Se sugiere un número que
-	# todavía no hayas alcanzado antes; si ya los viste todos,
-	# simplemente no se agrega nada.
+	bloque.append(obtener_linea_pista())
+
 	if ruta_reto_activa and reto_completado:
 		var disponibles: Array = NUMEROS_ESPECIALES.filter(
-			func(n): return not progreso["numeros_especiales_vistos"].has(n)
+			func(n):
+				return not progreso["numeros_especiales_vistos"].has(n)
 		)
 
 		if not disponibles.is_empty():
 			var numero_sugerido: int = disponibles.pick_random()
 
-			# Si la pista de arriba fue "no clickees nada", esta
-			# sugerencia sonaría contradictoria sin una transición.
 			if pista_es_no_clickees():
-				bloque.append({
-					"nombre": "Ella",
-					"texto": "O quizás podrías...",
-					"expresion": "confundida",
-					"espera": 1.0
-				})
+				bloque.append(
+					FinalesUnMinuto.puente_numero_especial()
+				)
 
-			bloque.append({
-				"nombre": "Ella",
-				"texto": (
-					"Para la próxima, intenta un número justo. Como "
-					+ str(numero_sugerido)
-					+ ". Ni uno más, ni uno menos."
-				),
-				"expresion": "coqueta",
-				"espera": 1.9
-			})
+			bloque.append(
+				FinalesUnMinuto.sugerencia_numero(numero_sugerido)
+			)
 
-	bloque.append({
-		"nombre": "Ella",
-		"texto": "Adiós.",
-		"expresion": "ojos_cerrados",
-		"espera": 1.0
-	})
+	bloque.append(FinalesUnMinuto.despedida_adios())
 
 	return bloque
-
 
 # =========================================================
 # PISTAS
@@ -1748,73 +1016,29 @@ func pista_es_no_clickees() -> bool:
 
 
 func obtener_linea_pista() -> Dictionary:
-	# Si esta partida terminó en zen y todavía no completaste
-	# el reto, esa es la sugerencia más útil posible: son casi
-	# opuestos, así que tiene sentido nudgear justo hacia allá.
 	if ruta_zen and not progreso["vio_reto_completado"]:
-		return {
-			"nombre": "Ella",
-			"texto": "La próxima vez, prueba aceptar el reto en vez de ignorarme.",
-			"expresion": "coqueta",
-			"espera": 1.9
-		}
+		return FinalesUnMinuto.pista_reto()
 
 	if not progreso["vio_zen"]:
-		return {
-			"nombre": "Ella",
-			"texto": "La próxima vez, ni un clic. Ni uno.",
-			"expresion": "neutral",
-			"espera": 1.7
-		}
+		return FinalesUnMinuto.pista_zen()
 
 	elif not progreso["vio_romantica"]:
-		return {
-			"nombre": "Ella",
-			"texto": "La próxima, prueba contestar cada vez que te pregunte algo, no solo una vez.",
-			"expresion": "sonrojada",
-			"espera": 2.0
-		}
+		return FinalesUnMinuto.pista_romantica()
 
 	elif not progreso["vio_indecisa"]:
-		return {
-			"nombre": "Ella",
-			"texto": "Prueba responder el tutorial, pero después ignórame.",
-			"expresion": "coqueta",
-			"espera": 1.8
-		}
+		return FinalesUnMinuto.pista_indecisa()
 
 	elif not progreso["vio_impaciente"]:
-		return {
-			"nombre": "Ella",
-			"texto": "La próxima vez, no esperes a que empiece el minuto para clickear como loco.",
-			"expresion": "confundida",
-			"espera": 1.9
-		}
+		return FinalesUnMinuto.pista_impaciente()
 
 	elif not progreso["vio_reto_completado"]:
-		return {
-			"nombre": "Ella",
-			"texto": "Acepta el reto y no te quedes corto.",
-			"expresion": "coqueta",
-			"espera": 1.6
-		}
+		return FinalesUnMinuto.pista_reto_completado()
 
 	elif not progreso["vio_perdedor"]:
-		return {
-			"nombre": "Ella",
-			"texto": "Acepta el reto, pero no te esfuerces tanto.",
-			"expresion": "confundida",
-			"espera": 1.7
-		}
+		return FinalesUnMinuto.pista_perdedor()
 
 	else:
-		return {
-			"nombre": "Ella",
-			"texto": "Supongo que todavía puedes sorprenderme.",
-			"expresion": "coqueta",
-			"espera": 1.6
-		}
-
+		return FinalesUnMinuto.pista_generica()
 
 # =========================================================
 # GUARDADO

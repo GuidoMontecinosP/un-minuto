@@ -1,9 +1,7 @@
 extends Control
 
-
 const JUEGO_PATH := "res://Juego.tscn"
 const SAVE_PATH := "user://progreso_1minuto.save"
-
 
 # =========================================================
 # NODOS DEL MENÚ PRINCIPAL
@@ -11,24 +9,45 @@ const SAVE_PATH := "user://progreso_1minuto.save"
 
 @onready var contenido_principal: Control = $ContenidoPrincipal
 @onready var contenido_finales: Control = $ContenidoFinales
+@onready var contenido_idiomas: Control = $ContenidoIdiomas
 
+@onready var titulo: Label = $ContenidoPrincipal/Titulos/Titulo
 @onready var subtitulo: Label = $ContenidoPrincipal/Titulos/Subtitulo
 
 @onready var boton_jugar: Button = $ContenidoPrincipal/Botones/BotonJugar
 @onready var boton_finales: Button = $ContenidoPrincipal/Botones/BotonFinales
+@onready var boton_idioma: Button = $ContenidoPrincipal/Botones/BotonIdioma
 @onready var boton_salir: Button = $ContenidoPrincipal/Botones/BotonSalir
 
 # =========================================================
-# NODOS DEL MENÚ DE LOS FINALES
+# NODOS DEL MENÚ DE FINALES
 # =========================================================
+
 @onready var lista_finales: Label = $ContenidoFinales/Contenido/PanelFinales/ListaFinales
 @onready var contador_finales: Label = $ContenidoFinales/Contenido/ContadorFinales
 @onready var boton_volver: Button = $ContenidoFinales/Contenido/BotonVolver
 
+# Si tienes un título dentro de ContenidoFinales, deja esta línea.
+# Si tu nodo se llama distinto, cambia la ruta.
+@onready var titulo_finales: Label = $ContenidoFinales/Contenido/TituloFinales
+
+# =========================================================
+# NODOS DEL MENÚ DE IDIOMA
+# =========================================================
+
+@onready var titulo_idiomas: Label = $ContenidoIdiomas/Contenido/Idioma
+
+@onready var boton_espanol: Button = $ContenidoIdiomas/Contenido/BotonEspanol
+@onready var boton_english: Button = $ContenidoIdiomas/Contenido/BotonEnglish
+@onready var boton_volver_idioma: Button = $ContenidoIdiomas/Contenido/BotonVolver
+
+@onready var contenedor_idiomas: BoxContainer = $ContenidoIdiomas/Contenido
 
 # =========================================================
 # PROGRESO
 # =========================================================
+
+var subtitulo_actual: String = ""
 
 var progreso := {
 	"vio_zen": false,
@@ -42,31 +61,49 @@ var progreso := {
 	"numeros_especiales_vistos": []
 }
 
-
 # =========================================================
 # INICIO
 # =========================================================
 
 func _ready() -> void:
 	cargar_progreso()
-
+	seleccionar_subtitulo()
+	
 	contenido_principal.visible = true
 	contenido_finales.visible = false
-
-	subtitulo.text = obtener_subtitulo()
+	contenido_idiomas.visible = false
 
 	boton_jugar.pressed.connect(_on_jugar_pressed)
 	boton_finales.pressed.connect(_on_finales_pressed)
+	boton_idioma.pressed.connect(_on_idioma_pressed)
 	boton_salir.pressed.connect(_on_salir_pressed)
+
 	boton_volver.pressed.connect(_on_volver_pressed)
 
+
+	actualizar_textos_menu()
+
 	boton_jugar.grab_focus()
-
+	configurar_menu_idiomas()
 
 # =========================================================
-# BOTONES
+# BOTONES PRINCIPALES
 # =========================================================
+func configurar_menu_idiomas() -> void:
+	# Todos los botones tendrán exactamente el mismo ancho.
+	var ancho := 500.0
 
+	boton_espanol.custom_minimum_size.x = ancho
+	boton_english.custom_minimum_size.x = ancho
+	boton_volver_idioma.custom_minimum_size.x = ancho
+
+	# El título también ocupa exactamente ese ancho.
+	titulo_idiomas.custom_minimum_size.x = ancho
+	titulo_idiomas.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# El contenedor no puede hacerse más angosto.
+	contenedor_idiomas.custom_minimum_size.x = ancho
+	
 func _on_jugar_pressed() -> void:
 	var error := get_tree().change_scene_to_file(JUEGO_PATH)
 
@@ -82,81 +119,267 @@ func _on_finales_pressed() -> void:
 	mostrar_finales()
 
 	contenido_principal.visible = false
+	contenido_idiomas.visible = false
 	contenido_finales.visible = true
 
 	boton_volver.grab_focus()
 
 
-func _on_volver_pressed() -> void:
-	contenido_finales.visible = false
-	contenido_principal.visible = true
+func _on_idioma_pressed() -> void:
+	if IdiomaManager.idioma_actual == "es":
+		IdiomaManager.cambiar_idioma("en")
+	else:
+		IdiomaManager.cambiar_idioma("es")
 
-	# Se vuelve a actualizar por si el progreso cambió.
-	subtitulo.text = obtener_subtitulo()
-
-	boton_finales.grab_focus()
-
+	actualizar_textos_menu()
 
 func _on_salir_pressed() -> void:
 	get_tree().quit()
 
+# =========================================================
+# VOLVER DESDE FINALES
+# =========================================================
 
+func _on_volver_pressed() -> void:
+	contenido_finales.visible = false
+	contenido_principal.visible = true
+
+
+	boton_finales.grab_focus()
+
+# =========================================================
+# IDIOMAS
+# =========================================================
+
+func _on_espanol_pressed() -> void:
+	IdiomaManager.cambiar_idioma("es")
+	actualizar_textos_menu()
+
+
+func _on_english_pressed() -> void:
+	IdiomaManager.cambiar_idioma("en")
+	actualizar_textos_menu()
+
+
+func _on_volver_idioma_pressed() -> void:
+	contenido_idiomas.visible = false
+	contenido_principal.visible = true
+
+	boton_idioma.grab_focus()
+
+# =========================================================
+# ACTUALIZAR TEXTOS DEL MENÚ
+# =========================================================
+
+func actualizar_textos_menu() -> void:
+	if IdiomaManager.idioma_actual == "es":
+		titulo.text = "UN MINUTO"
+
+		boton_jugar.text = "Jugar"
+		boton_finales.text = "Finales"
+		boton_idioma.text = "Idioma: ES"
+		boton_salir.text = "Salir"
+
+		titulo_finales.text = "Finales"
+		boton_volver.text = "Volver"
+
+	else:
+		titulo.text = "ONE MINUTE"
+
+		boton_jugar.text = "Play"
+		boton_finales.text = "Endings"
+		boton_idioma.text = "Language: EN"
+		boton_salir.text = "Quit"
+
+		titulo_finales.text = "Endings"
+		boton_volver.text = "Back"
+
+	subtitulo.text = obtener_subtitulo()
+
+	if contenido_finales.visible:
+		mostrar_finales()
+	if IdiomaManager.idioma_actual == "es":
+		titulo.text = "UN MINUTO"
+
+		boton_jugar.text = "Jugar"
+		boton_finales.text = "Finales"
+		boton_idioma.text = "Idioma"
+		boton_salir.text = "Salir"
+
+		titulo_finales.text = "Finales"
+		boton_volver.text = "Volver"
+
+		titulo_idiomas.text = "Idioma"
+
+		# Estos dos NO cambian
+		boton_espanol.text = "Español"
+		boton_english.text = "English"
+
+		boton_volver_idioma.text = "Volver"
+
+	else:
+		titulo.text = "ONE MINUTE"
+
+		boton_jugar.text = "Play"
+		boton_finales.text = "Endings"
+		boton_idioma.text = "Language"
+		boton_salir.text = "Quit"
+
+		titulo_finales.text = "Endings"
+		boton_volver.text = "Back"
+
+		titulo_idiomas.text = "Language"
+
+		# EXACTAMENTE IGUAL
+		boton_espanol.text = "Español"
+		boton_english.text = "English"
+
+		boton_volver_idioma.text = "Back"
+
+	subtitulo.text = obtener_subtitulo()
+
+	if contenido_finales.visible:
+		mostrar_finales()
 # =========================================================
 # SUBTÍTULO DINÁMICO
 # =========================================================
 
-func obtener_subtitulo() -> String:
+func seleccionar_subtitulo() -> void:
 	var partidas_jugadas: int = int(
 		progreso.get("partidas_jugadas", 0)
 	)
 
 	if partidas_jugadas == 0:
-		return "Tienes un minuto"
+		subtitulo_actual = "primera"
+		return
 
 	if partidas_jugadas == 1:
-		return "¿Otra vez?"
+		subtitulo_actual = "otra_vez"
+		return
 
 	if partidas_jugadas == 2:
-		return "Volviste"
+		subtitulo_actual = "volviste"
+		return
 
 	if partidas_jugadas <= 5:
-		var frases_tempranas := [
-			"Solo es un minuto",
-			"¿Y ahora qué vas a intentar?",
-			"Pensé que pararías",
-			"Sigues aquí",
-			"Empieza a ser costumbre"
+		var opciones_tempranas := [
+			"solo_minuto",
+			"que_intentar",
+			"pensaba_pararias",
+			"sigues_aqui",
+			"costumbre"
 		]
 
-		return frases_tempranas.pick_random()
+		subtitulo_actual = opciones_tempranas.pick_random()
+		return
 
-	var frases_repetidas := [
-		"No aprendiste nada, ¿verdad?",
-		"Ya sabes cómo funciona.",
-		"¿Buscando otro final?",
-		"No creo que cambie mucho esta vez.",
-		"Yo también tendría curiosidad.",
-		"Aún no te rindes",
-		"Pensé que ya habías terminado conmigo."
+	var opciones_repetidas := [
+		"no_aprendiste",
+		"ya_sabes",
+		"otro_final",
+		"no_cambie",
+		"curiosidad",
+		"no_rindes",
+		"terminado"
 	]
 
-	return frases_repetidas.pick_random()
+	subtitulo_actual = opciones_repetidas.pick_random()
 
+func obtener_subtitulo() -> String:
+	if IdiomaManager.idioma_actual == "es":
+		match subtitulo_actual:
+			"primera":
+				return "Tienes un minuto"
+			"otra_vez":
+				return "¿Otra vez?"
+			"volviste":
+				return "Volviste"
+			"solo_minuto":
+				return "Solo es un minuto"
+			"que_intentar":
+				return "¿Y ahora qué vas a intentar?"
+			"pensaba_pararias":
+				return "Pensé que pararías"
+			"sigues_aqui":
+				return "Sigues aquí"
+			"costumbre":
+				return "Empieza a ser costumbre"
+			"no_aprendiste":
+				return "No aprendiste nada, ¿verdad?"
+			"ya_sabes":
+				return "Ya sabes cómo funciona."
+			"otro_final":
+				return "¿Buscando otro final?"
+			"no_cambie":
+				return "No creo que cambie mucho esta vez."
+			"curiosidad":
+				return "Yo también tendría curiosidad."
+			"no_rindes":
+				return "Aún no te rindes"
+			"terminado":
+				return "Pensé que ya habías terminado conmigo."
 
+	else:
+		match subtitulo_actual:
+			"primera":
+				return "You have one minute"
+			"otra_vez":
+				return "Again?"
+			"volviste":
+				return "You're back"
+			"solo_minuto":
+				return "It's only a minute"
+			"que_intentar":
+				return "What are you trying this time?"
+			"pensaba_pararias":
+				return "I thought you'd stop"
+			"sigues_aqui":
+				return "You're still here"
+			"costumbre":
+				return "This is becoming a habit"
+			"no_aprendiste":
+				return "You didn't learn anything, did you?"
+			"ya_sabes":
+				return "You already know how this works."
+			"otro_final":
+				return "Looking for another ending?"
+			"no_cambie":
+				return "I don't think it'll change much this time."
+			"curiosidad":
+				return "I'd be curious too."
+			"no_rindes":
+				return "You still haven't given up"
+			"terminado":
+				return "I thought you were done with me."
+
+	return ""
 # =========================================================
 # MENÚ DE FINALES
 # =========================================================
 
 func mostrar_finales() -> void:
-	var finales := [
-		["vio_zen", "Zen"],
-		["vio_indecisa", "Indeciso"],
-		["vio_romantica", "Romántico"],
-		["vio_cobarde", "Cobarde"],
-		["vio_impaciente", "Impaciente"],
-		["vio_reto_completado", "Reto completado"],
-		["vio_perdedor", "Perdedor"]
-	]
+	var finales: Array
+
+	if IdiomaManager.idioma_actual == "es":
+		finales = [
+			["vio_zen", "Zen"],
+			["vio_indecisa", "Indeciso"],
+			["vio_romantica", "Romántico"],
+			["vio_cobarde", "Cobarde"],
+			["vio_impaciente", "Impaciente"],
+			["vio_reto_completado", "Reto completado"],
+			["vio_perdedor", "Perdedor"]
+		]
+	else:
+		finales = [
+			["vio_zen", "Zen"],
+			["vio_indecisa", "Indecisive"],
+			["vio_romantica", "Romantic"],
+			["vio_cobarde", "Coward"],
+			["vio_impaciente", "Impatient"],
+			["vio_reto_completado", "Challenge completed"],
+			["vio_perdedor", "Loser"]
+		]
 
 	var lineas: Array[String] = []
 	var descubiertos := 0
@@ -181,7 +404,6 @@ func mostrar_finales() -> void:
 		+ " / "
 		+ str(finales.size())
 	)
-
 
 # =========================================================
 # CARGAR PROGRESO

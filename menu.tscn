@@ -94,6 +94,13 @@ theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
 text = "Finales"
 
+[node name="BotonIdioma" type="Button" parent="ContenidoPrincipal/Botones" unique_id=1821818916]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_ouk20")
+text = "Idioma"
+
 [node name="BotonSalir" type="Button" parent="ContenidoPrincipal/Botones" unique_id=1726137387]
 layout_mode = 2
 size_flags_vertical = 8
@@ -102,6 +109,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_ouk20")
 text = "Salir"
 
 [node name="ContenidoFinales" type="CenterContainer" parent="." unique_id=1269631998]
+visible = false
 layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
@@ -140,6 +148,56 @@ text = "ListaFinales"
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_4hy44")
+text = "Volver"
+
+[node name="ContenidoIdiomas" type="Control" parent="." unique_id=497878734]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 419.0
+offset_top = 167.0
+offset_right = 835.0
+offset_bottom = 519.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Contenido" type="VBoxContainer" parent="ContenidoIdiomas" unique_id=1880301917]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.125
+anchor_right = 0.8629808
+anchor_bottom = 0.87784094
+offset_right = 98.0
+metadata/_edit_use_anchors_ = true
+
+[node name="Idioma" type="Label" parent="ContenidoIdiomas/Contenido" unique_id=413384187]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 120
+text = "Idioma"
+horizontal_alignment = 1
+
+[node name="BotonEspanol" type="Button" parent="ContenidoIdiomas/Contenido" unique_id=2119111539]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Español"
+
+[node name="BotonEnglish" type="Button" parent="ContenidoIdiomas/Contenido" unique_id=1503268691]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Inglés"
+
+[node name="BotonVolver" type="Button" parent="ContenidoIdiomas/Contenido" unique_id=779917193]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
 text = "Volver"
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=832108479]
