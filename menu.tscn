@@ -109,12 +109,11 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_ouk20")
 text = "Salir"
 
 [node name="ContenidoFinales" type="CenterContainer" parent="." unique_id=1269631998]
-visible = false
 layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 1272.0
-offset_bottom = 712.0
+offset_left = -3.0
+offset_top = 3.0
+offset_right = 1281.0
+offset_bottom = 728.0
 
 [node name="Contenido" type="VBoxContainer" parent="ContenidoFinales" unique_id=1611344511]
 layout_mode = 2
@@ -122,6 +121,7 @@ theme_override_constants/separation = 18
 
 [node name="TituloFinales" type="Label" parent="ContenidoFinales/Contenido" unique_id=1841945437]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 120
@@ -138,11 +138,59 @@ text = "Contador"
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mae5d")
 
-[node name="ListaFinales" type="Label" parent="ContenidoFinales/Contenido/PanelFinales" unique_id=600657301]
+[node name="GridFinales" type="GridContainer" parent="ContenidoFinales/Contenido/PanelFinales" unique_id=892979577]
 layout_mode = 2
 size_flags_horizontal = 4
+size_flags_vertical = 4
+columns = 3
+
+[node name="Final1" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=849665810]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 theme_override_font_sizes/font_size = 30
-text = "ListaFinales"
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="Final2" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=1532207501]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="Final3" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=270836861]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="Final4" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=1288195637]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="Final5" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=54453303]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="Final6" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=1674099555]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
+
+[node name="Final7" type="Button" parent="ContenidoFinales/Contenido/PanelFinales/GridFinales" unique_id=1421810850]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lti8b")
+text = "Jugar"
 
 [node name="BotonVolver" type="Button" parent="ContenidoFinales/Contenido" unique_id=1497976211]
 layout_mode = 2
@@ -151,6 +199,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_4hy44")
 text = "Volver"
 
 [node name="ContenidoIdiomas" type="Control" parent="." unique_id=497878734]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5

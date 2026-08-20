@@ -27,6 +27,16 @@ const SAVE_PATH := "user://progreso_1minuto.save"
 @onready var contador_finales: Label = $ContenidoFinales/Contenido/ContadorFinales
 @onready var boton_volver: Button = $ContenidoFinales/Contenido/BotonVolver
 
+@onready var grid_finales: GridContainer = $ContenidoFinales/Contenido/PanelFinales/GridFinales
+
+@onready var final_1: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final1
+@onready var final_2: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final2
+@onready var final_3: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final3
+@onready var final_4: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final4
+@onready var final_5: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final5
+@onready var final_6: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final6
+@onready var final_7: Button = $ContenidoFinales/Contenido/PanelFinales/GridFinales/Final7
+
 # Si tienes un título dentro de ContenidoFinales, deja esta línea.
 # Si tu nodo se llama distinto, cambia la ruta.
 @onready var titulo_finales: Label = $ContenidoFinales/Contenido/TituloFinales
@@ -66,8 +76,10 @@ var progreso := {
 # =========================================================
 
 func _ready() -> void:
+	
 	cargar_progreso()
 	seleccionar_subtitulo()
+	
 	
 	contenido_principal.visible = true
 	contenido_finales.visible = false
@@ -85,7 +97,66 @@ func _ready() -> void:
 
 	boton_jugar.grab_focus()
 	configurar_menu_idiomas()
+	
+	configurar_menu_finales()
 
+func configurar_menu_finales() -> void:
+	var botones_finales := [
+		final_1,
+		final_2,
+		final_3,
+		final_4,
+		final_5,
+		final_6,
+		final_7
+	]
+	grid_finales.position.x += 20
+	grid_finales.size.x -= 40
+
+	for boton in botones_finales:
+		boton.custom_minimum_size = Vector2(220, 85)
+		boton.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		boton.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+
+	grid_finales.add_theme_constant_override(
+		"h_separation",
+		6
+	)
+
+	grid_finales.add_theme_constant_override(
+		"v_separation",
+		12
+	)
+
+
+	for boton in botones_finales:
+		boton.custom_minimum_size = Vector2(200, 85)
+		boton.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		boton.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+
+	grid_finales.add_theme_constant_override(
+		"h_separation",
+		16
+	)
+
+	grid_finales.add_theme_constant_override(
+		"v_separation",
+		14
+	)
+	
+
+	for boton in botones_finales:
+		boton.custom_minimum_size = Vector2(215, 85)
+
+	grid_finales.add_theme_constant_override(
+		"h_separation",
+		18
+	)
+
+	grid_finales.add_theme_constant_override(
+		"v_separation",
+		14
+	)
 # =========================================================
 # BOTONES PRINCIPALES
 # =========================================================
@@ -358,6 +429,16 @@ func obtener_subtitulo() -> String:
 # =========================================================
 
 func mostrar_finales() -> void:
+	var botones := [
+		final_1,
+		final_2,
+		final_3,
+		final_4,
+		final_5,
+		final_6,
+		final_7
+	]
+
 	var finales: Array
 
 	if IdiomaManager.idioma_actual == "es":
@@ -367,44 +448,65 @@ func mostrar_finales() -> void:
 			["vio_romantica", "Romántico"],
 			["vio_cobarde", "Cobarde"],
 			["vio_impaciente", "Impaciente"],
-			["vio_reto_completado", "Reto completado"],
+			["vio_reto_completado", "Reto"],
 			["vio_perdedor", "Perdedor"]
 		]
 	else:
 		finales = [
-			["vio_zen", "Zen"],
-			["vio_indecisa", "Indecisive"],
-			["vio_romantica", "Romantic"],
-			["vio_cobarde", "Coward"],
-			["vio_impaciente", "Impatient"],
-			["vio_reto_completado", "Challenge completed"],
-			["vio_perdedor", "Loser"]
-		]
+		["vio_zen", "Zen"],
+		["vio_indecisa", "Indecisive"],
+		["vio_romantica", "Romantic"],
+		["vio_cobarde", "Coward"],
+		["vio_impaciente", "Impatient"],
+		["vio_reto_completado", "Challenge"],
+		["vio_perdedor", "Loser"]
+	]
+	
 
-	var lineas: Array[String] = []
 	var descubiertos := 0
 
-	for final in finales:
-		var clave: String = final[0]
-		var nombre_final: String = final[1]
+	for i in range(finales.size()):
+		var clave: String = finales[i][0]
+		var nombre_final: String = finales[i][1]
+
 		var desbloqueado: bool = bool(
 			progreso.get(clave, false)
 		)
 
+		var numero := "%02d" % (i + 1)
+
 		if desbloqueado:
-			lineas.append("✓ " + nombre_final)
+			botones[i].text = (
+				numero
+				+ "\n"
+				+ nombre_final
+			)
+
+			botones[i].disabled = false
 			descubiertos += 1
+
 		else:
-			lineas.append("???")
+			botones[i].text = (
+				numero
+				+ "\n???"
+			)
 
-	lista_finales.text = "\n".join(lineas)
+			botones[i].disabled = true
 
-	contador_finales.text = (
-		str(descubiertos)
-		+ " / "
-		+ str(finales.size())
-	)
+	if IdiomaManager.idioma_actual == "es":
+		contador_finales.text = (
+			str(descubiertos)
+			+ " / "
+			+ str(finales.size())
 
+		)
+	else:
+		contador_finales.text = (
+			str(descubiertos)
+			+ " / "
+			+ str(finales.size())
+			+ " discovered"
+		)
 # =========================================================
 # CARGAR PROGRESO
 # =========================================================
