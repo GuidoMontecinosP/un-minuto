@@ -23,7 +23,7 @@ const SAVE_PATH := "user://progreso_1minuto.save"
 # NODOS DEL MENÚ DE FINALES
 # =========================================================
 
-@onready var lista_finales: Label = $ContenidoFinales/Contenido/PanelFinales/ListaFinales
+
 @onready var contador_finales: Label = $ContenidoFinales/Contenido/ContadorFinales
 @onready var boton_volver: Button = $ContenidoFinales/Contenido/BotonVolver
 
@@ -511,6 +511,21 @@ func mostrar_finales() -> void:
 # CARGAR PROGRESO
 # =========================================================
 
+
+func guardar_progreso() -> void:
+	var archivo := FileAccess.open(
+		SAVE_PATH,
+		FileAccess.WRITE
+	)
+
+	if archivo == null:
+		push_warning("No se pudo guardar el progreso.")
+		return
+
+	archivo.store_var(progreso)
+	archivo.close()
+
+
 func cargar_progreso() -> void:
 	if not FileAccess.file_exists(SAVE_PATH):
 		return
@@ -538,3 +553,61 @@ func cargar_progreso() -> void:
 	for clave in progreso.keys():
 		if datos.has(clave):
 			progreso[clave] = datos[clave]
+
+func desbloquear_todos_los_finales_debug() -> void:
+	
+	if not OS.is_debug_build():
+		return
+	
+	progreso["vio_zen"] = true
+	progreso["vio_indecisa"] = true
+	progreso["vio_romantica"] = true
+	progreso["vio_cobarde"] = true
+	progreso["vio_impaciente"] = true
+	progreso["vio_reto_completado"] = true
+	progreso["vio_perdedor"] = true
+
+	guardar_progreso()
+	mostrar_finales()
+
+	print("DEBUG: Todos los finales desbloqueados")
+	
+
+func resetear_progreso_debug() -> void:
+	
+	if not OS.is_debug_build():
+		return
+	
+	progreso["vio_zen"] = false
+	progreso["vio_indecisa"] = false
+	progreso["vio_romantica"] = false
+	progreso["vio_cobarde"] = false
+	progreso["vio_impaciente"] = false
+	progreso["vio_reto_completado"] = false
+	progreso["vio_perdedor"] = false
+
+	progreso["partidas_jugadas"] = 0
+	progreso["numeros_especiales_vistos"] = []
+
+	guardar_progreso()
+	mostrar_finales()
+	seleccionar_subtitulo()
+
+	print("DEBUG: Progreso reseteado")
+
+func _input(event: InputEvent) -> void:
+	
+	if not OS.is_debug_build():
+		return
+	
+	if not event is InputEventKey:
+		return
+
+	if not event.pressed:
+		return
+
+	if event.keycode == KEY_F11:
+		desbloquear_todos_los_finales_debug()
+
+	if event.keycode == KEY_F10:
+		resetear_progreso_debug()
